@@ -38,7 +38,7 @@ GitHub REST API를 활용하여 저장소를 검색하고, 마음에 드는 저�
 - **Dart** 3.0+
 
 ### 상태 관리
-- **Provider** 또는 **flutter_bloc** (학습 진행도에 따라 선택)
+- **Provider**
 
 ### 데이터 저장
 - **Hive** - 로컬 NoSQL 데이터베이스
