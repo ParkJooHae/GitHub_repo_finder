@@ -42,10 +42,9 @@ GitHub REST API를 활용하여 저장소를 검색하고, 마음에 드는 저�
 
 ### 데이터 저장
 - **Hive** - 로컬 NoSQL 데이터베이스
-- **SharedPreferences** - 간단한 키값 저장
 
 ### 네트워킹
-- **http** 또는 **dio** - REST API 통신
+- **http** - REST API 통신
 
 ### 라우팅
 - **go_router** - 선언적 라우팅
@@ -58,43 +57,102 @@ GitHub REST API를 활용하여 저장소를 검색하고, 마음에 드는 저�
 ### 디렉토리 구조
 ```
 lib/
-├── core/
+├── core/ # 공통 기능
 │   ├── constants/
 │   ├── errors/
 │   └── utils/
-├── data/
+├── data/ # 데이터 계층
 │   ├── datasources/
 │   ├── models/
 │   └── repositories/
-├── domain/
+├── domain/ # 비즈니스 로직 계층
 │   ├── entities/
 │   ├── repositories/
 │   └── usecases/
-├── presentation/
+├── presentation/ # UI 계층
 │   ├── providers/
 │   ├── pages/
 │   └── widgets/
 └── main.dart
 ```
+
 ## 📱 주요 기능
 
 ### ✅ 구현 완료
-- [ ] GitHub Repository 검색 (디바운싱 300ms)
-- [ ] 검색 결과 페이지네이션
-- [ ] 즐겨찾기 추가/제거
-- [ ] 즐겨찾기 목록 조회
-- [ ] 오프라인 즐겨찾기 데이터 접근
-- [ ] Bottom Navigation
-- [ ] Android 홈화면 위젯
+- [x] GitHub Repository 검색 (디바운싱 300ms)
+- [x] 검색 결과 페이지네이션
+- [x] 즐겨찾기 추가/제거
+- [x] 즐겨찾기 목록 조회
+- [x] 오프라인 즐겨찾기 데이터 접근
+- [x] Bottom Navigation
+- [ ] Android 홈화면 위젯 (예정)
 
-### 🔄 개발 진행사항
-- [x] 요구사항 분석 및 기술 스택 선정
-- [x] 프로젝트 구조 설계
-- [ ] Flutter 환경 설정
-- [ ] GitHub API 연동
-- [ ] UI 구현
-- [ ] 로컬 데이터베이스 연동
-- [ ] Android 위젯 구현
+## 🔧 개발 과정
+
+### 1단계: Core 인프라 구축 ⚡
+**소요 시간**: 1-2시간
+
+**구현 내용**:
+- API 상수 정의 (`api_constants.dart`)
+- 예외 처리 클래스 구조 설계 (`exceptions.dart`)
+- 검색 디바운서 유틸리티 (`debouncer.dart`)
+- 도메인 엔티티 정의 (`repository_entity.dart`)
+- JSON 직렬화 모델 구조 설계
+
+### 2단계: GitHub API 연동 🔌
+**소요 시간**: 2-3시간
+
+**구현 내용**:
+- HTTP 통신 데이터소스 (`github_remote_datasource.dart`)
+- 검색 상태 관리 Provider (`search_provider.dart`)
+- SearchPage UI 구현
+    - 실시간 검색 입력창
+    - 디바운싱 적용 검색
+    - 무한 스크롤 페이지네이션
+    - 로딩/에러/빈결과 상태 UI
+- RepositoryItem 위젯 구현
+    - 저장소 정보 표시
+    - 소유자 아바타, 언어 칩
+    - 상세 정보 다이얼로그
+
+### 3단계: 로컬 데이터베이스 연동 💾
+**소요 시간**: 2-3시간
+
+**구현 내용**:
+- Hive 데이터베이스 설정
+- 북마크 모델 및 TypeAdapter (`bookmark_model.dart`)
+- 로컬 데이터소스 (`bookmark_local_datasource.dart`)
+- 북마크 상태 관리 Provider (`bookmark_provider.dart`)
+- BookmarkPage UI 구현
+    - 북마크 목록 표시 (최신순)
+    - 개별/전체 삭제 기능
+    - 실행취소 기능
+    - Pull-to-refresh
+- 검색-북마크 화면 간 상태 동기화
+
+### 4단계: Android 홈화면 위젯 📱
+**예정 소요 시간**: 1-2시간
+
+**구현 예정**:
+- Android 네이티브 위젯 코드 (Kotlin)
+- 최근 북마크 저장소 표시
+- Flutter와 네이티브 간 데이터 통신
+
+## 🚀 실행 방법
+
+```bash
+# 의존성 설치
+flutter pub get
+
+# 코드 생성 (JSON 직렬화, Hive TypeAdapter)
+dart run build_runner build --delete-conflicting-outputs
+
+# Android 에뮬레이터 실행
+flutter run
+
+# 빌드
+flutter build apk
+```
 
 ## 📖 학습 과정에서 참고한 자료
 
@@ -119,7 +177,22 @@ lib/
 - 적절한 터치 영역 크기
 - 고대비 모드 지원
 
+## 🎯 학습 성과
+
+### Flutter 개발 역량 습득
+- **Widget 기반 UI 구조** 이해
+- **Provider 패턴** 상태 관리 학습
+- **Clean Architecture** 적용 경험
+- **JSON 직렬화** 자동 생성 도구 활용
+
+### Android 개발 경험과의 비교 학습
+- Activity ↔ Widget 개념 매핑
+- RecyclerView ↔ ListView 구조 이해
+- 상태 관리 패턴 차이점 학습
+- 네이티브-Flutter 하이브리드 개발 경험
+
 ---
 
 **개발자**: ParkJooHae  
-**개발 기간**: 2025년 8월 4일 ~ 2025 8월 9일
+**개발 기간**: 2025년 8월 4일 ~ 2025년 8월 5일  
+**총 소요 시간**: 6시간
