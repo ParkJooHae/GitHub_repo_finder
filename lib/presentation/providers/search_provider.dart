@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import '../../core/utils/debouncer.dart';
 import '../../core/errors/exceptions.dart';
-import '../../data/datasources/github_remote_datasource.dart';
 import '../../domain/entities/repository_entity.dart';
+import '../../domain/usecases/search_repositories.dart';
 
 /// 검색 상태
 enum SearchStatus {
@@ -15,7 +14,7 @@ enum SearchStatus {
 }
 
 class SearchProvider extends ChangeNotifier {
-  final GitHubRemoteDataSource _dataSource;
+  final SearchRepositoriesUseCase _searchRepositoriesUseCase;
   final Debouncer _debouncer;
 
   // 상태 관리
@@ -30,9 +29,8 @@ class SearchProvider extends ChangeNotifier {
   bool _hasMorePages = false;
   static const int _perPage = 30;
 
-  SearchProvider()
-      : _dataSource = GitHubRemoteDataSourceImpl(client: http.Client()),
-        _debouncer = Debouncer(delay: const Duration(milliseconds: 300));
+  SearchProvider(this._searchRepositoriesUseCase)
+      : _debouncer = Debouncer(delay: const Duration(milliseconds: 300));
 
   // Getters
   SearchStatus get status => _status;
@@ -75,7 +73,7 @@ class SearchProvider extends ChangeNotifier {
     await _performSearch(_currentQuery, isNewSearch: true);
   }
 
-  /// 실제 검색 수행
+  /// 실제 검색 수행 (UseCase 사용)
   Future<void> _performSearch(String query, {required bool isNewSearch}) async {
     try {
       // 새 검색인 경우 페이지 초기화
@@ -89,15 +87,15 @@ class SearchProvider extends ChangeNotifier {
 
       notifyListeners();
 
-      // API 호출
-      final response = await _dataSource.searchRepositories(
+      // UseCase 호출 (기존 DataSource 직접 호출 대신)
+      final result = await _searchRepositoriesUseCase.call(
         query: query,
         page: _currentPage,
         perPage: _perPage,
       );
 
-      // 응답 데이터 처리
-      final newRepositories = response.items.map((model) => model.toEntity()).toList();
+      // 결과 처리
+      final newRepositories = result.items;
 
       if (isNewSearch) {
         _repositories = newRepositories;
@@ -105,10 +103,14 @@ class SearchProvider extends ChangeNotifier {
         _repositories.addAll(newRepositories);
       }
 
-      _totalCount = response.totalCount;
-      _hasMorePages = response.hasMorePages(_currentPage, _perPage);
+      _totalCount = result.totalCount;
+      _hasMorePages = result.hasMorePages;
       _status = SearchStatus.success;
       _errorMessage = '';
+
+      if (kDebugMode) {
+        print('SearchProvider: Loaded ${newRepositories.length} repositories (total: ${_repositories.length})');
+      }
 
     } catch (e) {
       // 에러 처리
@@ -122,7 +124,10 @@ class SearchProvider extends ChangeNotifier {
   void _handleError(dynamic error, bool isNewSearch) {
     String message;
 
-    if (error is RateLimitException) {
+    if (error is ArgumentError) {
+      // UseCase에서 발생한 유효성 검사 에러
+      message = error.message;
+    } else if (error is RateLimitException) {
       final resetTime = error.resetTime;
       if (resetTime != null) {
         final waitMinutes = resetTime.difference(DateTime.now()).inMinutes;
@@ -147,7 +152,7 @@ class SearchProvider extends ChangeNotifier {
     }
 
     if (kDebugMode) {
-      print('Search Error: $error');
+      print('SearchProvider Error: $error');
     }
   }
 

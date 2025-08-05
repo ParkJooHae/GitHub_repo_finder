@@ -10,6 +10,7 @@ abstract class BookmarkLocalDataSource {
   Future<bool> isBookmarked(int repositoryId);
   Future<RepositoryEntity?> getLatestBookmark();
   Future<void> clearAllBookmarks();
+  Future<int> getBookmarkCount(); // 🆕 추가된 메서드
 }
 
 class BookmarkLocalDataSourceImpl implements BookmarkLocalDataSource {
@@ -104,6 +105,15 @@ class BookmarkLocalDataSourceImpl implements BookmarkLocalDataSource {
     }
   }
 
+  @override
+  Future<int> getBookmarkCount() async {
+    try {
+      return _bookmarkBox.length;
+    } catch (e) {
+      throw LocalDatabaseException('북마크 개수 조회 중 오류가 발생했습니다: $e');
+    }
+  }
+
   /// 저장소 ID로 북마크 키 찾기
   dynamic _findBookmarkKey(int repositoryId) {
     for (final key in _bookmarkBox.keys) {
@@ -114,9 +124,6 @@ class BookmarkLocalDataSourceImpl implements BookmarkLocalDataSource {
     }
     return null;
   }
-
-  /// 북마크 개수 가져오기
-  int get bookmarkCount => _bookmarkBox.length;
 
   /// 박스 닫기 (앱 종료 시 호출)
   Future<void> close() async {

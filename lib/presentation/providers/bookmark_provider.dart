@@ -1,8 +1,12 @@
 import 'package:flutter/foundation.dart';
 import '../../core/errors/exceptions.dart';
-import '../../data/datasources/bookmark_local_datasource.dart';
 import '../../domain/entities/repository_entity.dart';
-import '../../services/widget_service.dart'; // 추가
+import '../../domain/usecases/get_bookmarks.dart';
+import '../../domain/usecases/add_bookmark.dart';
+import '../../domain/usecases/remove_bookmark.dart';
+import '../../domain/usecases/toggle_bookmark.dart';
+import '../../domain/usecases/clear_all_bookmarks.dart';
+import '../../services/widget_service.dart';
 
 /// 북마크 상태
 enum BookmarkStatus {
@@ -13,7 +17,12 @@ enum BookmarkStatus {
 }
 
 class BookmarkProvider extends ChangeNotifier {
-  final BookmarkLocalDataSource _dataSource;
+  // UseCase 의존성들
+  final GetBookmarksUseCase _getBookmarksUseCase;
+  final AddBookmarkUseCase _addBookmarkUseCase;
+  final RemoveBookmarkUseCase _removeBookmarkUseCase;
+  final ToggleBookmarkUseCase _toggleBookmarkUseCase;
+  final ClearAllBookmarksUseCase _clearAllBookmarksUseCase;
 
   // 상태 관리
   BookmarkStatus _status = BookmarkStatus.initial;
@@ -21,8 +30,17 @@ class BookmarkProvider extends ChangeNotifier {
   String _errorMessage = '';
   Set<int> _bookmarkedIds = {}; // 북마크된 저장소 ID 캐시
 
-  BookmarkProvider({BookmarkLocalDataSource? dataSource})
-      : _dataSource = dataSource ?? BookmarkLocalDataSourceImpl() {
+  BookmarkProvider({
+    required GetBookmarksUseCase getBookmarksUseCase,
+    required AddBookmarkUseCase addBookmarkUseCase,
+    required RemoveBookmarkUseCase removeBookmarkUseCase,
+    required ToggleBookmarkUseCase toggleBookmarkUseCase,
+    required ClearAllBookmarksUseCase clearAllBookmarksUseCase,
+  })  : _getBookmarksUseCase = getBookmarksUseCase,
+        _addBookmarkUseCase = addBookmarkUseCase,
+        _removeBookmarkUseCase = removeBookmarkUseCase,
+        _toggleBookmarkUseCase = toggleBookmarkUseCase,
+        _clearAllBookmarksUseCase = clearAllBookmarksUseCase {
     _loadBookmarks();
   }
 
@@ -46,13 +64,14 @@ class BookmarkProvider extends ChangeNotifier {
     return _bookmarks.first; // 이미 최신순으로 정렬되어 있음
   }
 
-  /// 북마크 목록 로드 (위젯 업데이트 포함)
+  /// 북마크 목록 로드 (UseCase 사용)
   Future<void> _loadBookmarks() async {
     try {
       _status = BookmarkStatus.loading;
       notifyListeners();
 
-      _bookmarks = await _dataSource.getBookmarks();
+      // UseCase 호출 (기존 DataSource 직접 호출 대신)
+      _bookmarks = await _getBookmarksUseCase.call();
       _updateBookmarkedIds();
 
       // 위젯 업데이트
@@ -71,15 +90,11 @@ class BookmarkProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 북마크 추가 (위젯 업데이트 포함)
+  /// 북마크 추가 (UseCase 사용)
   Future<void> addBookmark(RepositoryEntity repository) async {
     try {
-      // 이미 북마크된 경우 중복 방지
-      if (isBookmarked(repository.id)) {
-        throw LocalDatabaseException('이미 북마크에 추가된 저장소입니다.');
-      }
-
-      await _dataSource.addBookmark(repository);
+      // UseCase 호출 (비즈니스 로직 포함)
+      await _addBookmarkUseCase.call(repository);
 
       // 로컬 상태 업데이트
       final bookmarkedRepo = repository.copyWithBookmark();
@@ -100,10 +115,11 @@ class BookmarkProvider extends ChangeNotifier {
     }
   }
 
-  /// 북마크 제거 (위젯 업데이트 포함)
+  /// 북마크 제거 (UseCase 사용)
   Future<void> removeBookmark(int repositoryId) async {
     try {
-      await _dataSource.removeBookmark(repositoryId);
+      // UseCase 호출 (비즈니스 로직 포함)
+      await _removeBookmarkUseCase.call(repositoryId);
 
       // 로컬 상태 업데이트
       final removedRepo = _bookmarks.firstWhere((repo) => repo.id == repositoryId);
@@ -124,12 +140,21 @@ class BookmarkProvider extends ChangeNotifier {
     }
   }
 
-  /// 북마크 토글 (추가/제거)
+  /// 북마크 토글 (UseCase 사용)
   Future<void> toggleBookmark(RepositoryEntity repository) async {
-    if (isBookmarked(repository.id)) {
-      await removeBookmark(repository.id);
-    } else {
-      await addBookmark(repository);
+    try {
+      // UseCase 호출 (토글 로직 포함)
+      final isNowBookmarked = await _toggleBookmarkUseCase.call(repository);
+
+      // 전체 새로고침으로 상태 동기화 (간단하고 안전한 방법)
+      await _loadBookmarks();
+
+      if (kDebugMode) {
+        print('BookmarkProvider: Toggled bookmark ${repository.name} -> $isNowBookmarked');
+      }
+    } catch (e) {
+      _handleError(e);
+      rethrow;
     }
   }
 
@@ -138,24 +163,37 @@ class BookmarkProvider extends ChangeNotifier {
     await _loadBookmarks();
   }
 
-  /// 모든 북마크 삭제 (위젯 업데이트 포함)
+  /// 모든 북마크 삭제 (UseCase 사용)
   Future<void> clearAllBookmarks() async {
     try {
-      await _dataSource.clearAllBookmarks();
-      _bookmarks.clear();
-      _bookmarkedIds.clear();
+      // UseCase 호출
+      final deletedCount = await _clearAllBookmarksUseCase.call();
 
-      // 위젯 업데이트 (빈 리스트)
-      await WidgetService.updateWidget(_bookmarks);
+      if (deletedCount > 0) {
+        _bookmarks.clear();
+        _bookmarkedIds.clear();
 
-      notifyListeners();
+        // 위젯 업데이트 (빈 리스트)
+        await WidgetService.updateWidget(_bookmarks);
 
-      if (kDebugMode) {
-        print('BookmarkProvider: Cleared all bookmarks');
+        notifyListeners();
+
+        if (kDebugMode) {
+          print('BookmarkProvider: Cleared $deletedCount bookmarks');
+        }
       }
     } catch (e) {
       _handleError(e);
       rethrow;
+    }
+  }
+
+  /// 삭제할 북마크가 있는지 확인
+  Future<bool> hasBookmarksToDelete() async {
+    try {
+      return await _clearAllBookmarksUseCase.hasBookmarksToDelete();
+    } catch (e) {
+      return _bookmarks.isNotEmpty; // fallback
     }
   }
 
@@ -177,7 +215,13 @@ class BookmarkProvider extends ChangeNotifier {
   void _handleError(dynamic error) {
     String message;
 
-    if (error is LocalDatabaseException) {
+    if (error is ArgumentError) {
+      // UseCase에서 발생한 유효성 검사 에러
+      message = error.message;
+    } else if (error is StateError) {
+      // UseCase에서 발생한 상태 에러 (중복 북마크, 존재하지 않는 북마크 등)
+      message = error.message;
+    } else if (error is LocalDatabaseException) {
       message = error.message;
     } else {
       message = '알 수 없는 오류가 발생했습니다.';
