@@ -1,4 +1,3 @@
-// presentation/providers/bookmark_provider.dart
 import 'package:flutter/foundation.dart';
 import '../../core/errors/exceptions.dart';
 import '../../data/datasources/bookmark_local_datasource.dart';
@@ -87,8 +86,7 @@ class BookmarkProvider extends ChangeNotifier {
       _bookmarks.insert(0, bookmarkedRepo); // 맨 앞에 추가 (최신)
       _bookmarkedIds.add(repository.id);
 
-      // 새 북마크 추가 시 첫 번째로 리셋 후 위젯 업데이트
-      await WidgetService.resetToFirst();
+      // 위젯 업데이트 (항상 최신 북마크 표시)
       await WidgetService.updateWidget(_bookmarks);
 
       notifyListeners();
@@ -161,32 +159,12 @@ class BookmarkProvider extends ChangeNotifier {
     }
   }
 
-  /// 위젯에서 다음 북마크로 이동
-  Future<void> navigateWidgetNext() async {
-    await WidgetService.navigateNext(_bookmarks);
-
-    if (kDebugMode) {
-      final currentIndex = await WidgetService.getCurrentIndex();
-      print('BookmarkProvider: Widget navigate next to index $currentIndex');
-    }
-  }
-
-  /// 위젯에서 이전 북마크로 이동
-  Future<void> navigateWidgetPrevious() async {
-    await WidgetService.navigatePrevious(_bookmarks);
-
-    if (kDebugMode) {
-      final currentIndex = await WidgetService.getCurrentIndex();
-      print('BookmarkProvider: Widget navigate previous to index $currentIndex');
-    }
-  }
-
   /// 위젯 강제 업데이트 (디버깅용)
   Future<void> forceUpdateWidget() async {
     await WidgetService.updateWidget(_bookmarks);
 
     if (kDebugMode) {
-      print('BookmarkProvider: Force updated widget with ${_bookmarks.length} bookmarks');
+      print('BookmarkProvider: Force updated widget with latest bookmark');
     }
   }
 

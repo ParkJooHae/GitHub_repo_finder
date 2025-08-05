@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GitHub Repo Finder</string>
+    <string name="widget_description">최근 북마크한 GitHub 저장소를 확인하세요</string>
+</resources>
