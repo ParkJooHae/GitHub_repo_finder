@@ -130,14 +130,6 @@ class _SearchPageState extends State<SearchPage> {
               color: Colors.grey,
             ),
           ),
-          SizedBox(height: 8),
-          Text(
-            'flutter, react, vue 등을 검색해보세요',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-          ),
         ],
       ),
     );

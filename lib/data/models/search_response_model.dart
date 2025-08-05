@@ -5,7 +5,7 @@ part 'search_response_model.g.dart';
 
 /// GitHub 검색 API 응답 모델
 ///
-/// GitHub API의 /search/repositories 엔드포인트 응답을 파싱합니다.
+/// GitHub API의 /search/repositories 엔드포인트 응답을 파싱
 @JsonSerializable()
 class SearchResponseModel {
   @JsonKey(name: 'total_count')

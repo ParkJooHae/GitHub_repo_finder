@@ -30,6 +30,10 @@ dependencies:
   # 기타 유틸리티
   cached_network_image: ^3.3.0
 
+  # 홈화면 위젯 지원
+  home_widget: ^0.4.1
+  shared_preferences: ^2.2.2
+
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
@@ -40,7 +44,7 @@ dev_dependencies:
 
   json_serializable: ^6.7.1
 
-  # Hive 코드 생성
+  # Hive
   hive_generator: ^2.0.1
   build_runner: ^2.4.7
 

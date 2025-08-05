@@ -5,7 +5,7 @@ part 'repository_model.g.dart';
 
 /// GitHub API 응답을 위한 저장소 모델
 ///
-/// JSON 직렬화/역직렬화를 담당하며, RepositoryEntity로 변환됩니다.
+/// JSON 직렬화/역직렬화를 담당하며, RepositoryEntity로 변환
 @JsonSerializable()
 class RepositoryModel {
   final int id;
