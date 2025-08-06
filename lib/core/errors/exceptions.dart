@@ -1,4 +1,4 @@
-// Base Exception
+
 abstract class AppException implements Exception {
   final String message;
   final String? code;

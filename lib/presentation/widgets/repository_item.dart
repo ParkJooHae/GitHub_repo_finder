@@ -135,10 +135,10 @@ class RepositoryItem extends StatelessWidget {
         child: const Icon(Icons.person, size: 20),
       );
     } else {
-      return CircleAvatar(
+      return const CircleAvatar(
         radius: 20,
-        backgroundColor: Colors.grey[300],
-        child: const Icon(Icons.person, size: 20),
+        backgroundColor: Colors.grey,
+        child: Icon(Icons.person, size: 20),
       );
     }
   }
@@ -188,11 +188,24 @@ class RepositoryItem extends StatelessWidget {
     );
   }
 
-  /// 숫자 포맷팅 (1000 -> 1k)
   String _formatNumber(int number) {
-    if (number < 1000) return number.toString();
-    if (number < 1000000) return '${(number / 1000).toStringAsFixed(1)}k';
-    return '${(number / 1000000).toStringAsFixed(1)}M';
+    switch (number) {
+      case 0: return '0';
+      case 1: return '1';
+      case 2: return '2';
+      case 3: return '3';
+      case 4: return '4';
+      case 5: return '5';
+      case 6: return '6';
+      case 7: return '7';
+      case 8: return '8';
+      case 9: return '9';
+      case 10: return '10';
+      default:
+        if (number < 1000) return number.toString();
+        if (number < 1000000) return '${(number / 1000).toStringAsFixed(1)}k';
+        return '${(number / 1000000).toStringAsFixed(1)}M';
+    }
   }
 
   /// 언어별 색상

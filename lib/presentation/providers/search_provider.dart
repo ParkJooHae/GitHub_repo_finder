@@ -44,25 +44,32 @@ class SearchProvider extends ChangeNotifier {
   bool get hasError => _status == SearchStatus.error;
   bool get hasData => _repositories.isNotEmpty;
 
-  /// 검색 실행 (디바운싱 적용)
+  /// 검색 실행
   void searchRepositories(String query) {
     _currentQuery = query.trim();
 
-    // 빈 쿼리인 경우 초기화
-    if (_currentQuery.isEmpty) {
-      _clearResults();
-      return;
-    }
-
     // 디바운싱 적용
     _debouncer.call(() {
-      _performSearch(_currentQuery, isNewSearch: true);
+      if (_currentQuery.isEmpty) {
+        _clearResults();
+      } else {
+        _performSearch(_currentQuery, isNewSearch: true);
+      }
     });
+  }
+
+  /// 현재 쿼리 설정 (TextField 동기화용)
+  void setCurrentQuery(String query) {
+    _currentQuery = query.trim();
+    notifyListeners();
   }
 
   /// 다음 페이지 로드
   Future<void> loadMoreRepositories() async {
-    if (!_hasMorePages || _isLoadingAny()) return;
+    // 이미 로딩 중이거나 더 이상 페이지가 없으면 스킵
+    if (!_hasMorePages || _isLoadingAny() || _currentQuery.isEmpty) {
+      return;
+    }
 
     await _performSearch(_currentQuery, isNewSearch: false);
   }
@@ -73,7 +80,6 @@ class SearchProvider extends ChangeNotifier {
     await _performSearch(_currentQuery, isNewSearch: true);
   }
 
-  /// 실제 검색 수행 (UseCase 사용)
   Future<void> _performSearch(String query, {required bool isNewSearch}) async {
     try {
       // 새 검색인 경우 페이지 초기화
@@ -87,14 +93,12 @@ class SearchProvider extends ChangeNotifier {
 
       notifyListeners();
 
-      // UseCase 호출 (기존 DataSource 직접 호출 대신)
       final result = await _searchRepositoriesUseCase.call(
         query: query,
         page: _currentPage,
         perPage: _perPage,
       );
 
-      // 결과 처리
       final newRepositories = result.items;
 
       if (isNewSearch) {
@@ -108,12 +112,7 @@ class SearchProvider extends ChangeNotifier {
       _status = SearchStatus.success;
       _errorMessage = '';
 
-      if (kDebugMode) {
-        print('SearchProvider: Loaded ${newRepositories.length} repositories (total: ${_repositories.length})');
-      }
-
     } catch (e) {
-      // 에러 처리
       _handleError(e, isNewSearch);
     }
 
@@ -124,10 +123,7 @@ class SearchProvider extends ChangeNotifier {
   void _handleError(dynamic error, bool isNewSearch) {
     String message;
 
-    if (error is ArgumentError) {
-      // UseCase에서 발생한 유효성 검사 에러
-      message = error.message;
-    } else if (error is RateLimitException) {
+    if (error is RateLimitException) {
       final resetTime = error.resetTime;
       if (resetTime != null) {
         final waitMinutes = resetTime.difference(DateTime.now()).inMinutes;
@@ -150,10 +146,6 @@ class SearchProvider extends ChangeNotifier {
     if (!isNewSearch && _currentPage > 1) {
       _currentPage--;
     }
-
-    if (kDebugMode) {
-      print('SearchProvider Error: $error');
-    }
   }
 
   /// 결과 초기화
@@ -164,6 +156,7 @@ class SearchProvider extends ChangeNotifier {
     _hasMorePages = false;
     _status = SearchStatus.initial;
     _errorMessage = '';
+    _currentQuery = ''; // 현재 쿼리도 초기화
     notifyListeners();
   }
 

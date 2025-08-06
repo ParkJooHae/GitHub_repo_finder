@@ -14,12 +14,19 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  late SearchProvider _searchProvider;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    
+    // SearchProvider의 현재 쿼리로 TextField 초기화
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<SearchProvider>();
+      if (provider.currentQuery.isNotEmpty) {
+        _searchController.text = provider.currentQuery;
+      }
+    });
   }
 
   @override
@@ -29,9 +36,16 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
-  /// 스크롤 이벤트 처리 (무한 스크롤)
+  /// 스크롤 이벤트
   void _onScroll() {
     final provider = context.read<SearchProvider>();
+    
+    // 이미 로딩 중이거나 더 이상 페이지가 없으면 스킵
+    if (provider.isLoadingMore || !provider.hasMorePages) {
+      return;
+    }
+    
+    // 스크롤 위치가 끝에서 200px 이내일 때만 로드
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
       provider.loadMoreRepositories();
@@ -70,22 +84,21 @@ class _SearchPageState extends State<SearchPage> {
       child: TextField(
         controller: _searchController,
         decoration: const InputDecoration(
-          hintText: '저장소 검색... (예: flutter, react)',
+          hintText: 'Git Hub 저장소를 검색해 주세요.',
           prefixIcon: Icon(Icons.search),
           border: OutlineInputBorder(),
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
         onChanged: (value) {
-          context.read<SearchProvider>().searchRepositories(value);
-        },
-        onSubmitted: (value) {
-          context.read<SearchProvider>().searchRepositories(value);
+          final provider = context.read<SearchProvider>();
+          provider.setCurrentQuery(value);
+          provider.searchRepositories(value);
         },
       ),
     );
   }
 
-  /// 검색 결과 컨텐츠
+  /// 검색 결과
   Widget _buildSearchContent(SearchProvider provider) {
     // 초기 상태
     if (provider.status == SearchStatus.initial) {
@@ -124,7 +137,7 @@ class _SearchPageState extends State<SearchPage> {
           ),
           SizedBox(height: 16),
           Text(
-            'GitHub 저장소를 검색해보세요',
+            'GitHub 저장소를 검색해주세요',
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey,
@@ -249,20 +262,21 @@ class _SearchPageState extends State<SearchPage> {
 
           // 검색 결과 리스트
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: provider.repositories.length +
-                  (provider.hasMorePages ? 1 : 0),
-              itemBuilder: (context, index) {
-                // 로딩 더 보기 인디케이터
-                if (index == provider.repositories.length) {
-                  return _buildLoadMoreIndicator(provider);
-                }
+            child: Consumer<BookmarkProvider>(
+              builder: (context, bookmarkProvider, child) {
+                return ListView.builder(
+                  controller: _scrollController,
+                  itemCount: provider.repositories.length +
+                      (provider.hasMorePages ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    // 로딩 더 보기 인디케이터
+                    if (index == provider.repositories.length) {
+                      return _buildLoadMoreIndicator(provider);
+                    }
 
-                // 저장소 아이템
-                final repository = provider.repositories[index];
-                return Consumer<BookmarkProvider>(
-                  builder: (context, bookmarkProvider, child) {
+                    // 저장소 아이템
+                    final repository = provider.repositories[index];
+                    
                     // 저장소에 북마크 상태 정보 추가
                     final isBookmarked = bookmarkProvider.isBookmarked(repository.id);
                     final repositoryWithBookmarkState = isBookmarked
@@ -270,6 +284,7 @@ class _SearchPageState extends State<SearchPage> {
                         : repository;
 
                     return RepositoryItem(
+                      key: ValueKey(repository.id), // 고유 키 추가
                       repository: repositoryWithBookmarkState,
                       onBookmarkToggle: (repo) async {
                         try {

@@ -1,45 +1,34 @@
-// presentation/pages/main_page.dart
 import 'package:flutter/material.dart';
-import 'search_page.dart';
-import 'bookmark_page.dart';
+import 'package:go_router/go_router.dart';
 
 class MainPage extends StatefulWidget {
-  final int initialIndex; // 초기 탭 인덱스 추가
+  final Widget child;
 
-  const MainPage({super.key, this.initialIndex = 0});
+  const MainPage({super.key, required this.child});
 
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
-  late int _currentIndex;
 
-  final List<Widget> _pages = [
-    const SearchPage(),
-    const BookmarkPage(),
-  ];
+  int _calculateSelectedIndex(BuildContext context) {
+    final String location = GoRouterState.of(context).uri.path;
 
-  @override
-  void initState() {
-    super.initState();
-    _currentIndex = widget.initialIndex; // 초기 인덱스 설정
+    if (location.startsWith('/search')) return 0;
+    if (location.startsWith('/bookmarks')) return 1;
 
-    // 디버그 로그
-    print('MainPage initialized with index: ${widget.initialIndex}');
+    return 0; // 기본값: 검색 탭
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
+      body: widget.child,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: _calculateSelectedIndex(context),
         onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          print('Tab changed to index: $index');
+          _onTap(context, index);
         },
         items: const [
           BottomNavigationBarItem(
@@ -53,5 +42,19 @@ class _MainPageState extends State<MainPage> {
         ],
       ),
     );
+  }
+
+  /// 탭 선택 시 처리
+  void _onTap(BuildContext context, int index) {
+    switch (index) {
+      case 0:
+      // 검색 탭
+        context.go('/search');
+        break;
+      case 1:
+      // 북마크 탭
+        context.go('/bookmarks');
+        break;
+    }
   }
 }

@@ -164,20 +164,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
               fontSize: 14,
               color: Colors.grey[500],
             ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () {
-              // 검색 탭으로 이동
-              final mainPageState = context.findAncestorStateOfType<State>();
-              if (mainPageState != null && mainPageState.mounted) {
-                // MainPage에서 탭 변경하는 방법을 구현해야 함
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              }
-            },
-            icon: const Icon(Icons.search),
-            label: const Text('저장소 검색하기'),
-          ),
+          )
         ],
       ),
     );

@@ -21,9 +21,9 @@ import 'domain/usecases/toggle_bookmark.dart';
 import 'domain/usecases/clear_all_bookmarks.dart';
 
 // Presentation Layer
-import 'presentation/pages/main_page.dart';
 import 'presentation/providers/search_provider.dart';
 import 'presentation/providers/bookmark_provider.dart';
+import 'presentation/router/router_config.dart'; // 추가
 
 // Services
 import 'services/widget_service.dart';
@@ -50,28 +50,19 @@ void main() async {
 }
 
 /// 의존성 주입 설정
-///
-/// Clean Architecture의 의존성 역전 원칙을 적용하여
-/// 모든 계층의 의존성을 주입합니다.
 Future<AppDependencies> _setupDependencies() async {
   // === Data Layer 초기화 ===
-
-  // DataSources
   final githubDataSource = GitHubRemoteDataSourceImpl(
     client: http.Client(),
   );
   final bookmarkDataSource = BookmarkLocalDataSourceImpl();
 
-  // Repositories (Domain 인터페이스를 Data에서 구현)
+  // Repositories
   final GitHubRepository githubRepository = GitHubRepositoryImpl(githubDataSource);
   final BookmarkRepository bookmarkRepository = BookmarkRepositoryImpl(bookmarkDataSource);
 
   // === Domain Layer 초기화 ===
-
-  // GitHub UseCases
   final searchRepositoriesUseCase = SearchRepositoriesUseCase(githubRepository);
-
-  // Bookmark UseCases
   final getBookmarksUseCase = GetBookmarksUseCase(bookmarkRepository);
   final addBookmarkUseCase = AddBookmarkUseCase(bookmarkRepository);
   final removeBookmarkUseCase = RemoveBookmarkUseCase(bookmarkRepository);
@@ -79,10 +70,7 @@ Future<AppDependencies> _setupDependencies() async {
   final clearAllBookmarksUseCase = ClearAllBookmarksUseCase(bookmarkRepository);
 
   return AppDependencies(
-    // Search 관련
     searchRepositoriesUseCase: searchRepositoriesUseCase,
-
-    // Bookmark 관련
     getBookmarksUseCase: getBookmarksUseCase,
     addBookmarkUseCase: addBookmarkUseCase,
     removeBookmarkUseCase: removeBookmarkUseCase,
@@ -92,13 +80,8 @@ Future<AppDependencies> _setupDependencies() async {
 }
 
 /// 애플리케이션 의존성 컨테이너
-///
-/// 모든 UseCase들을 담고 있어서 Provider들에게 주입됩니다.
 class AppDependencies {
-  // Search 관련 UseCase
   final SearchRepositoriesUseCase searchRepositoriesUseCase;
-
-  // Bookmark 관련 UseCases
   final GetBookmarksUseCase getBookmarksUseCase;
   final AddBookmarkUseCase addBookmarkUseCase;
   final RemoveBookmarkUseCase removeBookmarkUseCase;
@@ -106,10 +89,7 @@ class AppDependencies {
   final ClearAllBookmarksUseCase clearAllBookmarksUseCase;
 
   AppDependencies({
-    // Search
     required this.searchRepositoriesUseCase,
-
-    // Bookmark
     required this.getBookmarksUseCase,
     required this.addBookmarkUseCase,
     required this.removeBookmarkUseCase,
@@ -145,13 +125,13 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         title: 'GitHub Repo Finder',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
         ),
-        home: const MainPage(),
+        routerConfig: AppRouter.router,
         debugShowCheckedModeBanner: false,
       ),
     );

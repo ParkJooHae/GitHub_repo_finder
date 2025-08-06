@@ -10,7 +10,7 @@ abstract class BookmarkLocalDataSource {
   Future<bool> isBookmarked(int repositoryId);
   Future<RepositoryEntity?> getLatestBookmark();
   Future<void> clearAllBookmarks();
-  Future<int> getBookmarkCount(); // 🆕 추가된 메서드
+  Future<int> getBookmarkCount();
 }
 
 class BookmarkLocalDataSourceImpl implements BookmarkLocalDataSource {
@@ -21,7 +21,6 @@ class BookmarkLocalDataSourceImpl implements BookmarkLocalDataSource {
     _bookmarkBox = Hive.box<BookmarkModel>(_boxName);
   }
 
-  /// Hive 박스 초기화 (앱 시작 시 호출)
   static Future<void> initialize() async {
     await Hive.openBox<BookmarkModel>(_boxName);
   }
@@ -31,7 +30,7 @@ class BookmarkLocalDataSourceImpl implements BookmarkLocalDataSource {
     try {
       final bookmarks = _bookmarkBox.values.toList();
 
-      // 북마크 추가 시간 역순으로 정렬 (최신이 먼저)
+      // 북마크 sorting
       bookmarks.sort((a, b) => b.bookmarkedAt.compareTo(a.bookmarkedAt));
 
       return bookmarks.map((bookmark) => bookmark.toEntity()).toList();
@@ -92,7 +91,7 @@ class BookmarkLocalDataSourceImpl implements BookmarkLocalDataSource {
       bookmarks.sort((a, b) => b.bookmarkedAt.compareTo(a.bookmarkedAt));
       return bookmarks.first.toEntity();
     } catch (e) {
-      throw LocalDatabaseException('최근 북마크를 불러오는 중 오류가 발생했습니다: $e');
+      throw LocalDatabaseException('북마크를 불러오는 중 오류가 발생했습니다: $e');
     }
   }
 

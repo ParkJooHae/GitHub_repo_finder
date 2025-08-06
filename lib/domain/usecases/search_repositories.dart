@@ -17,7 +17,7 @@ class SearchRepositoriesUseCase {
   /// [perPage] 페이지당 항목 수 (기본값: 30)
   ///
   /// Returns: 검색 결과
-  /// Throws: [ArgumentError] 검색어가 비어있는 경우
+  /// Throws: [ArgumentError] 페이지 파라미터가 유효하지 않은 경우
   Future<SearchResult> call({
     required String query,
     int page = 1,
@@ -26,7 +26,12 @@ class SearchRepositoriesUseCase {
     // 비즈니스 규칙: 검색어 유효성 검사
     final trimmedQuery = query.trim();
     if (trimmedQuery.isEmpty) {
-      throw ArgumentError('검색어를 입력해주세요.');
+      // 빈 검색어일 때는 빈 결과 반환
+      return const SearchResult(
+        items: [],
+        totalCount: 0,
+        hasMorePages: false,
+      );
     }
 
     // 비즈니스 규칙: 페이지 파라미터 검증

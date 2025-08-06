@@ -1,4 +1,3 @@
-import '../../domain/entities/repository_entity.dart';
 import '../../domain/repositories/github_repository.dart';
 import '../datasources/github_remote_datasource.dart';
 
