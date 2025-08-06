@@ -12,6 +12,32 @@ class BookmarkPage extends StatefulWidget {
 }
 
 class _BookmarkPageState extends State<BookmarkPage> {
+  final ScrollController _scrollController = ScrollController();
+  bool _showScrollToTopButton = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// 스크롤 이벤트
+  void _onScroll() {
+    // 상단으로 올라가는 버튼 표시 여부 결정
+    final shouldShowButton = _scrollController.position.pixels > 300;
+    if (_showScrollToTopButton != shouldShowButton) {
+      setState(() {
+        _showScrollToTopButton = shouldShowButton;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,6 +87,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
           return _buildBookmarkContent(provider);
         },
       ),
+      floatingActionButton: _buildScrollToTopButton(),
     );
   }
 
@@ -196,11 +223,48 @@ class _BookmarkPageState extends State<BookmarkPage> {
                   ),
                 ),
                 const Spacer(),
-                Text(
-                  '최신순',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
+                GestureDetector(
+                  onTap: () {
+                    provider.toggleSortOrder();
+                    
+                    // 정렬 변경 피드백
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          provider.sortOrder == BookmarkSortOrder.newest 
+                              ? '최신순으로 정렬되었습니다.' 
+                              : '오래된순으로 정렬되었습니다.'
+                        ),
+                        duration: const Duration(seconds: 1),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          provider.sortOrder == BookmarkSortOrder.newest ? '최신순' : '오래된순',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.swap_vert,
+                          size: 14,
+                          color: Colors.grey[700],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -209,12 +273,14 @@ class _BookmarkPageState extends State<BookmarkPage> {
 
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
               itemCount: provider.bookmarks.length,
               itemBuilder: (context, index) {
                 final repository = provider.bookmarks[index];
 
                 return RepositoryItem(
                   repository: repository,
+                  onItemTap: () => FocusScope.of(context).unfocus(),
                   onBookmarkToggle: (repo) async {
                     await _removeBookmark(repo, provider);
                   },
@@ -343,6 +409,31 @@ class _BookmarkPageState extends State<BookmarkPage> {
           ),
         ],
       ),
+    );
+  }
+
+  /// 상단 버튼
+  Widget? _buildScrollToTopButton() {
+    return Consumer<BookmarkProvider>(
+      builder: (context, provider, child) {
+        // 30개 이상의 아이템이 있고, 스크롤이 일정이상 내려가면 보임
+        if (provider.bookmarks.length >= 30 && _showScrollToTopButton) {
+          return FloatingActionButton(
+            onPressed: () {
+              _scrollController.animateTo(
+                0,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeInOut,
+              );
+            },
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            child: const Icon(Icons.keyboard_arrow_up),
+            mini: true,
+          );
+        }
+        return const SizedBox.shrink();
+      },
     );
   }
 }

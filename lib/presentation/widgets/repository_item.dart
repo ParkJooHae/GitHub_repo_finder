@@ -5,11 +5,13 @@ import '../../domain/entities/repository_entity.dart';
 class RepositoryItem extends StatelessWidget {
   final RepositoryEntity repository;
   final Function(RepositoryEntity) onBookmarkToggle;
+  final VoidCallback? onItemTap;
 
   const RepositoryItem({
     super.key,
     required this.repository,
     required this.onBookmarkToggle,
+    this.onItemTap,
   });
 
   @override
@@ -17,7 +19,10 @@ class RepositoryItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: InkWell(
-        onTap: () => _showRepositoryDetails(context),
+        onTap: () {
+          onItemTap?.call();
+          _showRepositoryDetails(context);
+        },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -237,6 +242,9 @@ class RepositoryItem extends StatelessWidget {
 
   /// 저장소 상세 정보 다이얼로그
   void _showRepositoryDetails(BuildContext context) {
+    // 포커스 해제
+    FocusScope.of(context).unfocus();
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

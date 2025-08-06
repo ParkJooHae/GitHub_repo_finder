@@ -14,13 +14,13 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  bool _showScrollToTopButton = false;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-    
-    // SearchProvider의 현재 쿼리로 TextField 초기화
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<SearchProvider>();
       if (provider.currentQuery.isNotEmpty) {
@@ -50,6 +50,14 @@ class _SearchPageState extends State<SearchPage> {
         _scrollController.position.maxScrollExtent - 200) {
       provider.loadMoreRepositories();
     }
+
+    // 상단으로 올라가는 버튼 표시 여부 결정
+    final shouldShowButton = _scrollController.position.pixels > 300;
+    if (_showScrollToTopButton != shouldShowButton) {
+      setState(() {
+        _showScrollToTopButton = shouldShowButton;
+      });
+    }
   }
 
   @override
@@ -72,6 +80,7 @@ class _SearchPageState extends State<SearchPage> {
           ),
         ],
       ),
+      floatingActionButton: _buildScrollToTopButton(),
     );
   }
 
@@ -277,6 +286,7 @@ class _SearchPageState extends State<SearchPage> {
                     return RepositoryItem(
                       key: ValueKey(repository.id),
                       repository: repositoryWithBookmarkState,
+                      onItemTap: _unfocusTextField,
                       onBookmarkToggle: (repo) async {
                         try {
                           await bookmarkProvider.toggleBookmark(repo);
@@ -328,5 +338,35 @@ class _SearchPageState extends State<SearchPage> {
     }
 
     return const SizedBox.shrink();
+  }
+
+  /// 포커스 해제
+  void _unfocusTextField() {
+    FocusScope.of(context).unfocus();
+  }
+
+  /// 상단으로 올라가는 버튼
+  Widget? _buildScrollToTopButton() {
+    return Consumer<SearchProvider>(
+      builder: (context, provider, child) {
+        // 30개 이상의 아이템이 있고, 스크롤 버튼이 표시되어야 할 때만 보임
+        if (provider.repositories.length >= 30 && _showScrollToTopButton) {
+          return FloatingActionButton(
+            onPressed: () {
+              _scrollController.animateTo(
+                0,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeInOut,
+              );
+            },
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            child: const Icon(Icons.keyboard_arrow_up),
+            mini: true,
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
   }
 }

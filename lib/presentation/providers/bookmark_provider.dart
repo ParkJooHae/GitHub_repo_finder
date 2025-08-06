@@ -8,6 +8,12 @@ import '../../domain/usecases/toggle_bookmark.dart';
 import '../../domain/usecases/clear_all_bookmarks.dart';
 import '../../services/widget_service.dart';
 
+/// 북마크 정렬 방식
+enum BookmarkSortOrder {
+  newest,  // 최신순
+  oldest,  // 오래된순
+}
+
 /// 북마크 상태
 enum BookmarkStatus {
   initial,  // 기본
@@ -28,6 +34,7 @@ class BookmarkProvider extends ChangeNotifier {
   List<RepositoryEntity> _bookmarks = [];
   String _errorMessage = '';
   Set<int> _bookmarkedIds = {};
+  BookmarkSortOrder _sortOrder = BookmarkSortOrder.newest;
 
   BookmarkProvider({
     required GetBookmarksUseCase getBookmarksUseCase,
@@ -50,6 +57,27 @@ class BookmarkProvider extends ChangeNotifier {
   bool get hasError => _status == BookmarkStatus.error;
   bool get hasBookmarks => _bookmarks.isNotEmpty;
   int get bookmarkCount => _bookmarks.length;
+  BookmarkSortOrder get sortOrder => _sortOrder;
+
+  /// 정렬 순서 토글
+  void toggleSortOrder() {
+    _sortOrder = _sortOrder == BookmarkSortOrder.newest 
+        ? BookmarkSortOrder.oldest 
+        : BookmarkSortOrder.newest;
+    
+    // 현재 정렬 상태에 따라 리스트를 뒤집기
+    if (_bookmarks.isNotEmpty) {
+      _bookmarks = _bookmarks.reversed.toList();
+    }
+    
+    notifyListeners();
+  }
+
+  /// 북마크 정렬 (로드 시에만 사용)
+  void _sortBookmarks() {
+    // 로드 시에는 항상 최신순으로 정렬되어 있으므로 아무것도 하지 않음
+    // 토글은 toggleSortOrder()에서 처리
+  }
 
   /// 저장소가 북마크되어 있는지 확인
   bool isBookmarked(int repositoryId) {
@@ -70,6 +98,7 @@ class BookmarkProvider extends ChangeNotifier {
 
       _bookmarks = await _getBookmarksUseCase.call();
       _updateBookmarkedIds();
+      _sortBookmarks(); // 북마크 로드 시 정렬
 
       await WidgetService.updateWidget(_bookmarks);
 
@@ -94,6 +123,7 @@ class BookmarkProvider extends ChangeNotifier {
       final bookmarkedRepo = repository.copyWithBookmark();
       _bookmarks.insert(0, bookmarkedRepo);
       _bookmarkedIds.add(repository.id);
+      _sortBookmarks(); // 북마크 추가 시 정렬
 
       await WidgetService.updateWidget(_bookmarks);
 
@@ -116,6 +146,7 @@ class BookmarkProvider extends ChangeNotifier {
       final removedRepo = _bookmarks.firstWhere((repo) => repo.id == repositoryId);
       _bookmarks.removeWhere((repo) => repo.id == repositoryId);
       _bookmarkedIds.remove(repositoryId);
+      _sortBookmarks(); // 북마크 제거 시 정렬
 
       await WidgetService.updateWidget(_bookmarks);
 
