@@ -91,7 +91,6 @@ class _SearchPageState extends State<SearchPage> {
         ),
         onChanged: (value) {
           final provider = context.read<SearchProvider>();
-          provider.setCurrentQuery(value);
           provider.searchRepositories(value);
         },
       ),

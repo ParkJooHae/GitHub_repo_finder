@@ -81,7 +81,7 @@ class BookmarkProvider extends ChangeNotifier {
       _errorMessage = '';
 
       if (kDebugMode) {
-        print('BookmarkProvider: Loaded ${_bookmarks.length} bookmarks');
+    
       }
     } catch (e) {
       _handleError(e);
@@ -107,7 +107,7 @@ class BookmarkProvider extends ChangeNotifier {
       notifyListeners();
 
       if (kDebugMode) {
-        print('BookmarkProvider: Added bookmark ${repository.name}');
+
       }
     } catch (e) {
       _handleError(e);
@@ -132,7 +132,7 @@ class BookmarkProvider extends ChangeNotifier {
       notifyListeners();
 
       if (kDebugMode) {
-        print('BookmarkProvider: Removed bookmark ${removedRepo.name}');
+
       }
     } catch (e) {
       _handleError(e);
@@ -150,7 +150,7 @@ class BookmarkProvider extends ChangeNotifier {
       await _loadBookmarks();
 
       if (kDebugMode) {
-        print('BookmarkProvider: Toggled bookmark ${repository.name} -> $isNowBookmarked');
+
       }
     } catch (e) {
       _handleError(e);
@@ -179,7 +179,7 @@ class BookmarkProvider extends ChangeNotifier {
         notifyListeners();
 
         if (kDebugMode) {
-          print('BookmarkProvider: Cleared $deletedCount bookmarks');
+  
         }
       }
     } catch (e) {
@@ -202,7 +202,7 @@ class BookmarkProvider extends ChangeNotifier {
     await WidgetService.updateWidget(_bookmarks);
 
     if (kDebugMode) {
-      print('BookmarkProvider: Force updated widget with latest bookmark');
+      
     }
   }
 
@@ -231,7 +231,7 @@ class BookmarkProvider extends ChangeNotifier {
     _status = BookmarkStatus.error;
 
     if (kDebugMode) {
-      print('BookmarkProvider Error: $error');
+
     }
   }
 

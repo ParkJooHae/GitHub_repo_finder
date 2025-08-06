@@ -33,9 +33,9 @@ class WidgetService {
         iOSName: iOSWidgetName,
       );
 
-      print('Widget updated: latest bookmark displayed');
+      
     } catch (e) {
-      print('Widget update error: $e');
+      
     }
   }
 
@@ -50,16 +50,16 @@ class WidgetService {
     await HomeWidget.saveWidgetData('avatar_url', '');
     await HomeWidget.saveWidgetData('has_data', 'false');
 
-    print('Widget data cleared');
+    
   }
 
   /// 위젯 설정 및 초기화
   static Future<void> initializeWidget() async {
     try {
       await HomeWidget.setAppGroupId('group.com.jhp.github_repo_finder');
-      print('Widget initialized');
+      
     } catch (e) {
-      print('Widget initialization error: $e');
+      
     }
   }
 
@@ -75,5 +75,5 @@ class WidgetService {
 @pragma("vm:entry-point")
 Future<void> backgroundCallback(Uri? data) async {
   // 더 이상 사용하지 않음
-  print('Background callback received (not used): $data');
+  
 }

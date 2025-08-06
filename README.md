@@ -51,9 +51,9 @@ lib/
 │   ├── errors/
 │   │   └── exceptions.dart         # 예외 정의
 │   └── utils/
-│       └── debouncer.dart          # 디바운싱 유틸
+│       └── debouncer.dart          # 디바운스 유틸
 │
-├── data/                           # Data Layer
+├── data/                       
 │   ├── datasources/               # 외부 데이터 접근
 │   │   ├── github_remote_datasource.dart
 │   │   └── bookmark_local_datasource.dart
@@ -61,11 +61,11 @@ lib/
 │   │   ├── repository_model.dart
 │   │   ├── search_response_model.dart
 │   │   └── bookmark_model.dart
-│   └── repositories/              # Repository 구현체
+│   └── repositories/              # Repository 
 │       ├── github_repository_impl.dart
 │       └── bookmark_repository_impl.dart
 │
-├── domain/                         # Domain Layer
+├── domain/                      
 │   ├── entities/                  # 비즈니스 엔티티
 │   │   └── repository_entity.dart
 │   ├── repositories/              # Repository 인터페이스
@@ -79,7 +79,7 @@ lib/
 │       ├── toggle_bookmark.dart
 │       └── clear_all_bookmarks.dart
 │
-├── presentation/                   # Presentation Layer
+├── presentation/                
 │   ├── providers/                 # 상태 관리 (Clean)
 │   │   ├── search_provider.dart
 │   │   └── bookmark_provider.dart
@@ -87,6 +87,8 @@ lib/
 │   │   ├── main_page.dart
 │   │   ├── search_page.dart
 │   │   └── bookmark_page.dart
+│   ├── router/                      # 라우터
+│   │   └── router_config.dart 
 │   └── widgets/                   # 재사용 UI 컴포넌트
 │       └── repository_item.dart
 │
@@ -121,7 +123,7 @@ lib/
 ### 구현 완료 기능
 
 - **GitHub Repository 검색**
-  - 실시간 검색 (디바운싱 300ms)
+  - 실시간 검색 (디바운스 300ms)
   - 스크롤 페이지네이션
   - 에러 처리 및 로딩 상태 표시
 

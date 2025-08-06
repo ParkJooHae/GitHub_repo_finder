@@ -46,10 +46,14 @@ class SearchProvider extends ChangeNotifier {
 
   /// 검색 실행
   void searchRepositories(String query) {
-    _currentQuery = query.trim();
-
+    final trimmedQuery = query.trim();
+    
+    // 현재 쿼리 즉시 업데이트 (UI 동기화용)
+    _currentQuery = trimmedQuery;
+    
     // 디바운싱 적용
     _debouncer.call(() {
+      // 디바운싱된 콜백에서는 현재 쿼리를 다시 확인
       if (_currentQuery.isEmpty) {
         _clearResults();
       } else {
@@ -58,11 +62,7 @@ class SearchProvider extends ChangeNotifier {
     });
   }
 
-  /// 현재 쿼리 설정 (TextField 동기화용)
-  void setCurrentQuery(String query) {
-    _currentQuery = query.trim();
-    notifyListeners();
-  }
+
 
   /// 다음 페이지 로드
   Future<void> loadMoreRepositories() async {
