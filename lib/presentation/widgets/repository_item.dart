@@ -24,10 +24,9 @@ class RepositoryItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 저장소 헤더 (이름, 북마크 버튼)
               Row(
                 children: [
-                  // 소유자 아바타
+                  // 아바타
                   _buildOwnerAvatar(),
                   const SizedBox(width: 12),
 
@@ -125,7 +124,7 @@ class RepositoryItem extends StatelessWidget {
     );
   }
 
-  /// 소유자 아바타
+  /// 아바타
   Widget _buildOwnerAvatar() {
     if (repository.avatarUrl != null && repository.avatarUrl!.isNotEmpty) {
       return CircleAvatar(
@@ -143,7 +142,7 @@ class RepositoryItem extends StatelessWidget {
     }
   }
 
-  /// 언어 칩
+  /// 언어
   Widget _buildLanguageChip(String language) {
     final color = _getLanguageColor(language);
 

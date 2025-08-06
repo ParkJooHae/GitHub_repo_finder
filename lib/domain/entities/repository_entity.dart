@@ -1,4 +1,3 @@
-/// GitHub 저장소 엔티티
 class RepositoryEntity {
   final int id;
   final String name;
@@ -13,8 +12,6 @@ class RepositoryEntity {
   final DateTime? updatedAt;
   final bool isPrivate;
   final String? defaultBranch;
-
-  // 북마크 관련 필드 (로컬에서 사용)
   final DateTime? bookmarkedAt;
 
   const RepositoryEntity({
@@ -34,7 +31,6 @@ class RepositoryEntity {
     this.bookmarkedAt,
   });
 
-  /// 북마크 추가된 새로운 엔티티 생성
   RepositoryEntity copyWithBookmark({DateTime? bookmarkedAt}) {
     return RepositoryEntity(
       id: id,
@@ -54,7 +50,6 @@ class RepositoryEntity {
     );
   }
 
-  /// 북마크 제거된 새로운 엔티티 생성
   RepositoryEntity copyWithoutBookmark() {
     return RepositoryEntity(
       id: id,
@@ -74,7 +69,6 @@ class RepositoryEntity {
     );
   }
 
-  /// 북마크 여부 확인
   bool get isBookmarked => bookmarkedAt != null;
 
   @override

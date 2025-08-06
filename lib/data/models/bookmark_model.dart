@@ -46,7 +46,7 @@ class BookmarkModel extends HiveObject {
   final String? defaultBranch;
 
   @HiveField(13)
-  final DateTime bookmarkedAt;
+  final DateTime bookmarkedAt; // 북마크 추가 시간
 
   BookmarkModel({
     required this.id,

@@ -3,9 +3,6 @@ import '../../domain/entities/repository_entity.dart';
 
 part 'repository_model.g.dart';
 
-/// GitHub API 응답을 위한 저장소 모델
-///
-/// JSON 직렬화/역직렬화를 담당하며, RepositoryEntity로 변환
 @JsonSerializable()
 class RepositoryModel {
   final int id;
@@ -43,14 +40,11 @@ class RepositoryModel {
     this.defaultBranch,
   });
 
-  /// JSON에서 RepositoryModel 생성 (자동 생성)
   factory RepositoryModel.fromJson(Map<String, dynamic> json) =>
       _$RepositoryModelFromJson(json);
 
-  /// RepositoryModel을 JSON으로 변환 (자동 생성)
   Map<String, dynamic> toJson() => _$RepositoryModelToJson(this);
 
-  /// RepositoryModel을 RepositoryEntity로 변환
   RepositoryEntity toEntity() {
     return RepositoryEntity(
       id: id,
@@ -69,7 +63,6 @@ class RepositoryModel {
     );
   }
 
-  /// RepositoryEntity에서 RepositoryModel 생성 (북마크 저장용)
   factory RepositoryModel.fromEntity(RepositoryEntity entity) {
     return RepositoryModel(
       id: entity.id,
@@ -91,7 +84,6 @@ class RepositoryModel {
   }
 }
 
-/// 저장소 소유자 모델
 @JsonSerializable()
 class OwnerModel {
   final String login;
@@ -103,10 +95,8 @@ class OwnerModel {
     this.avatarUrl,
   });
 
-  /// JSON에서 OwnerModel 생성 (자동 생성)
   factory OwnerModel.fromJson(Map<String, dynamic> json) =>
       _$OwnerModelFromJson(json);
 
-  /// OwnerModel을 JSON으로 변환 (자동 생성)
   Map<String, dynamic> toJson() => _$OwnerModelToJson(this);
 }

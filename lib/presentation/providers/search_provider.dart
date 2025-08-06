@@ -32,7 +32,6 @@ class SearchProvider extends ChangeNotifier {
   SearchProvider(this._searchRepositoriesUseCase)
       : _debouncer = Debouncer(delay: const Duration(milliseconds: 300));
 
-  // Getters
   SearchStatus get status => _status;
   List<RepositoryEntity> get repositories => _repositories;
   String get errorMessage => _errorMessage;
@@ -47,13 +46,11 @@ class SearchProvider extends ChangeNotifier {
   /// 검색 실행
   void searchRepositories(String query) {
     final trimmedQuery = query.trim();
-    
-    // 현재 쿼리 즉시 업데이트 (UI 동기화용)
+
     _currentQuery = trimmedQuery;
     
-    // 디바운싱 적용
+    // 디바운스 적용
     _debouncer.call(() {
-      // 디바운싱된 콜백에서는 현재 쿼리를 다시 확인
       if (_currentQuery.isEmpty) {
         _clearResults();
       } else {
@@ -61,8 +58,6 @@ class SearchProvider extends ChangeNotifier {
       }
     });
   }
-
-
 
   /// 다음 페이지 로드
   Future<void> loadMoreRepositories() async {

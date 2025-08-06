@@ -10,25 +10,24 @@ import '../../services/widget_service.dart';
 
 /// 북마크 상태
 enum BookmarkStatus {
-  initial,  // 초기 상태
+  initial,  // 기본
   loading,  // 로딩 중
   success,  // 성공
   error,    // 에러
 }
 
 class BookmarkProvider extends ChangeNotifier {
-  // UseCase 의존성들
+
   final GetBookmarksUseCase _getBookmarksUseCase;
   final AddBookmarkUseCase _addBookmarkUseCase;
   final RemoveBookmarkUseCase _removeBookmarkUseCase;
   final ToggleBookmarkUseCase _toggleBookmarkUseCase;
   final ClearAllBookmarksUseCase _clearAllBookmarksUseCase;
 
-  // 상태 관리
   BookmarkStatus _status = BookmarkStatus.initial;
   List<RepositoryEntity> _bookmarks = [];
   String _errorMessage = '';
-  Set<int> _bookmarkedIds = {}; // 북마크된 저장소 ID 캐시
+  Set<int> _bookmarkedIds = {};
 
   BookmarkProvider({
     required GetBookmarksUseCase getBookmarksUseCase,
@@ -44,7 +43,6 @@ class BookmarkProvider extends ChangeNotifier {
     _loadBookmarks();
   }
 
-  // Getters
   BookmarkStatus get status => _status;
   List<RepositoryEntity> get bookmarks => _bookmarks;
   String get errorMessage => _errorMessage;
@@ -61,7 +59,7 @@ class BookmarkProvider extends ChangeNotifier {
   /// 가장 최근 북마크 가져오기 (위젯용)
   RepositoryEntity? get latestBookmark {
     if (_bookmarks.isEmpty) return null;
-    return _bookmarks.first; // 이미 최신순으로 정렬되어 있음
+    return _bookmarks.first;
   }
 
   /// 북마크 목록 로드 (UseCase 사용)
@@ -70,11 +68,9 @@ class BookmarkProvider extends ChangeNotifier {
       _status = BookmarkStatus.loading;
       notifyListeners();
 
-      // UseCase 호출 (기존 DataSource 직접 호출 대신)
       _bookmarks = await _getBookmarksUseCase.call();
       _updateBookmarkedIds();
 
-      // 위젯 업데이트
       await WidgetService.updateWidget(_bookmarks);
 
       _status = BookmarkStatus.success;
@@ -90,18 +86,15 @@ class BookmarkProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 북마크 추가 (UseCase 사용)
+  /// 북마크 추가
   Future<void> addBookmark(RepositoryEntity repository) async {
     try {
-      // UseCase 호출 (비즈니스 로직 포함)
       await _addBookmarkUseCase.call(repository);
 
-      // 로컬 상태 업데이트
       final bookmarkedRepo = repository.copyWithBookmark();
-      _bookmarks.insert(0, bookmarkedRepo); // 맨 앞에 추가 (최신)
+      _bookmarks.insert(0, bookmarkedRepo);
       _bookmarkedIds.add(repository.id);
 
-      // 위젯 업데이트 (항상 최신 북마크 표시)
       await WidgetService.updateWidget(_bookmarks);
 
       notifyListeners();
@@ -111,22 +104,19 @@ class BookmarkProvider extends ChangeNotifier {
       }
     } catch (e) {
       _handleError(e);
-      rethrow; // UI에서 에러 메시지를 표시할 수 있도록
+      rethrow;
     }
   }
 
-  /// 북마크 제거 (UseCase 사용)
+  /// 북마크 제거
   Future<void> removeBookmark(int repositoryId) async {
     try {
-      // UseCase 호출 (비즈니스 로직 포함)
       await _removeBookmarkUseCase.call(repositoryId);
 
-      // 로컬 상태 업데이트
       final removedRepo = _bookmarks.firstWhere((repo) => repo.id == repositoryId);
       _bookmarks.removeWhere((repo) => repo.id == repositoryId);
       _bookmarkedIds.remove(repositoryId);
 
-      // 위젯 업데이트
       await WidgetService.updateWidget(_bookmarks);
 
       notifyListeners();
@@ -136,17 +126,15 @@ class BookmarkProvider extends ChangeNotifier {
       }
     } catch (e) {
       _handleError(e);
-      rethrow; // UI에서 에러 메시지를 표시할 수 있도록
+      rethrow;
     }
   }
 
   /// 북마크 토글 (UseCase 사용)
   Future<void> toggleBookmark(RepositoryEntity repository) async {
     try {
-      // UseCase 호출 (토글 로직 포함)
       final isNowBookmarked = await _toggleBookmarkUseCase.call(repository);
 
-      // 전체 새로고침으로 상태 동기화 (간단하고 안전한 방법)
       await _loadBookmarks();
 
       if (kDebugMode) {
@@ -163,17 +151,15 @@ class BookmarkProvider extends ChangeNotifier {
     await _loadBookmarks();
   }
 
-  /// 모든 북마크 삭제 (UseCase 사용)
+  /// 모든 북마크 삭제
   Future<void> clearAllBookmarks() async {
     try {
-      // UseCase 호출
       final deletedCount = await _clearAllBookmarksUseCase.call();
 
       if (deletedCount > 0) {
         _bookmarks.clear();
         _bookmarkedIds.clear();
 
-        // 위젯 업데이트 (빈 리스트)
         await WidgetService.updateWidget(_bookmarks);
 
         notifyListeners();
@@ -193,7 +179,7 @@ class BookmarkProvider extends ChangeNotifier {
     try {
       return await _clearAllBookmarksUseCase.hasBookmarksToDelete();
     } catch (e) {
-      return _bookmarks.isNotEmpty; // fallback
+      return _bookmarks.isNotEmpty;
     }
   }
 
@@ -216,10 +202,10 @@ class BookmarkProvider extends ChangeNotifier {
     String message;
 
     if (error is ArgumentError) {
-      // UseCase에서 발생한 유효성 검사 에러
+      // 유효성 검사 에러
       message = error.message;
     } else if (error is StateError) {
-      // UseCase에서 발생한 상태 에러 (중복 북마크, 존재하지 않는 북마크 등)
+      // 북마크 상태 에러
       message = error.message;
     } else if (error is LocalDatabaseException) {
       message = error.message;

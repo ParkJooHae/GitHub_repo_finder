@@ -39,12 +39,12 @@ class _SearchPageState extends State<SearchPage> {
   /// 스크롤 이벤트
   void _onScroll() {
     final provider = context.read<SearchProvider>();
-    
+
     // 이미 로딩 중이거나 더 이상 페이지가 없으면 스킵
     if (provider.isLoadingMore || !provider.hasMorePages) {
       return;
     }
-    
+
     // 스크롤 위치가 끝에서 200px 이내일 때만 로드
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
@@ -61,10 +61,8 @@ class _SearchPageState extends State<SearchPage> {
       ),
       body: Column(
         children: [
-          // 검색 입력창
           _buildSearchField(),
 
-          // 검색 결과 영역
           Expanded(
             child: Consumer<SearchProvider>(
               builder: (context, provider, child) {
@@ -99,17 +97,16 @@ class _SearchPageState extends State<SearchPage> {
 
   /// 검색 결과
   Widget _buildSearchContent(SearchProvider provider) {
-    // 초기 상태
     if (provider.status == SearchStatus.initial) {
       return _buildInitialState();
     }
 
-    // 로딩 상태 (첫 검색)
+    // 로딩
     if (provider.status == SearchStatus.loading) {
       return _buildLoadingState();
     }
 
-    // 에러 상태
+    // 에러
     if (provider.hasError) {
       return _buildErrorState(provider);
     }
@@ -123,7 +120,7 @@ class _SearchPageState extends State<SearchPage> {
     return _buildSearchResults(provider);
   }
 
-  /// 초기 상태 UI
+  /// 처음 UI
   Widget _buildInitialState() {
     return const Center(
       child: Column(
@@ -147,7 +144,7 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  /// 로딩 상태 UI
+  /// 로딩 UI
   Widget _buildLoadingState() {
     return const Center(
       child: Column(
@@ -161,7 +158,7 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  /// 에러 상태 UI
+  /// 에러 UI
   Widget _buildErrorState(SearchProvider provider) {
     return Center(
       child: Padding(
@@ -241,7 +238,6 @@ class _SearchPageState extends State<SearchPage> {
       onRefresh: provider.refreshSearch,
       child: Column(
         children: [
-          // 검색 결과 헤더
           if (provider.totalCount > 0)
             Container(
               width: double.infinity,
@@ -259,7 +255,6 @@ class _SearchPageState extends State<SearchPage> {
               ),
             ),
 
-          // 검색 결과 리스트
           Expanded(
             child: Consumer<BookmarkProvider>(
               builder: (context, bookmarkProvider, child) {
@@ -268,22 +263,19 @@ class _SearchPageState extends State<SearchPage> {
                   itemCount: provider.repositories.length +
                       (provider.hasMorePages ? 1 : 0),
                   itemBuilder: (context, index) {
-                    // 로딩 더 보기 인디케이터
                     if (index == provider.repositories.length) {
                       return _buildLoadMoreIndicator(provider);
                     }
 
-                    // 저장소 아이템
                     final repository = provider.repositories[index];
-                    
-                    // 저장소에 북마크 상태 정보 추가
+
                     final isBookmarked = bookmarkProvider.isBookmarked(repository.id);
                     final repositoryWithBookmarkState = isBookmarked
                         ? repository.copyWithBookmark()
                         : repository;
 
                     return RepositoryItem(
-                      key: ValueKey(repository.id), // 고유 키 추가
+                      key: ValueKey(repository.id),
                       repository: repositoryWithBookmarkState,
                       onBookmarkToggle: (repo) async {
                         try {

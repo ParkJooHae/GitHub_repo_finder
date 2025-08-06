@@ -1,15 +1,11 @@
 import '../entities/repository_entity.dart';
 
-/// GitHub Repository 인터페이스
-///
-/// GitHub API 관련 작업을 추상화한 Repository 패턴
 abstract class GitHubRepository {
+
   /// 저장소 검색
-  ///
   /// [query] 검색어
   /// [page] 페이지 번호 (기본값: 1)
   /// [perPage] 페이지당 항목 수 (기본값: 30)
-  ///
   /// Returns: 검색 결과와 메타데이터를 포함한 [SearchResult]
   Future<SearchResult> searchRepositories({
     required String query,

@@ -18,7 +18,7 @@ class _MainPageState extends State<MainPage> {
     if (location.startsWith('/search')) return 0;
     if (location.startsWith('/bookmarks')) return 1;
 
-    return 0; // 기본값: 검색 탭
+    return 0; // 첫 화면 설정
   }
 
   @override
@@ -48,11 +48,9 @@ class _MainPageState extends State<MainPage> {
   void _onTap(BuildContext context, int index) {
     switch (index) {
       case 0:
-      // 검색 탭
         context.go('/search');
         break;
       case 1:
-      // 북마크 탭
         context.go('/bookmarks');
         break;
     }

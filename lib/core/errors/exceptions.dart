@@ -34,7 +34,6 @@ class GitHubApiException extends AppException {
       );
 }
 
-// Rate Limiting Exception
 class RateLimitException extends GitHubApiException {
   final DateTime? resetTime;
 
@@ -47,12 +46,10 @@ class RateLimitException extends GitHubApiException {
       );
 }
 
-// Local Database Exceptions
 class LocalDatabaseException extends AppException {
   const LocalDatabaseException(super.message, [super.code]);
 }
 
-// Cache Exceptions
 class CacheException extends AppException {
   const CacheException(super.message, [super.code]);
 }

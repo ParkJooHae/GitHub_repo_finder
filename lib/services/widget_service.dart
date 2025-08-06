@@ -9,9 +9,7 @@ class WidgetService {
   static Future<void> updateWidget(List<RepositoryEntity> bookmarks) async {
     try {
       if (bookmarks.isNotEmpty) {
-        final latestRepo = bookmarks.first; // 항상 첫 번째 (최신) 북마크만 표시
-
-        // 최신 저장소 데이터
+        final latestRepo = bookmarks.first;
         await HomeWidget.saveWidgetData('repo_name', latestRepo.name);
         await HomeWidget.saveWidgetData('repo_full_name', latestRepo.fullName);
         await HomeWidget.saveWidgetData('repo_owner', latestRepo.ownerLogin);
@@ -19,15 +17,11 @@ class WidgetService {
         await HomeWidget.saveWidgetData('repo_language', latestRepo.language ?? '');
         await HomeWidget.saveWidgetData('repo_url', latestRepo.htmlUrl);
         await HomeWidget.saveWidgetData('avatar_url', latestRepo.avatarUrl ?? '');
-
-        // 위젯에 데이터가 있음을 표시
         await HomeWidget.saveWidgetData('has_data', 'true');
       } else {
-        // 북마크가 없는 경우
         await _clearWidgetData();
       }
 
-      // 위젯 업데이트 트리거
       await HomeWidget.updateWidget(
         androidName: androidWidgetName,
         iOSName: iOSWidgetName,
@@ -49,8 +43,6 @@ class WidgetService {
     await HomeWidget.saveWidgetData('repo_url', '');
     await HomeWidget.saveWidgetData('avatar_url', '');
     await HomeWidget.saveWidgetData('has_data', 'false');
-
-    
   }
 
   /// 위젯 설정 및 초기화
@@ -63,7 +55,6 @@ class WidgetService {
     }
   }
 
-  /// 숫자 포맷팅 (1000 -> 1k)
   static String _formatNumber(int number) {
     if (number < 1000) return number.toString();
     if (number < 1000000) return '${(number / 1000).toStringAsFixed(1)}k';
@@ -71,9 +62,7 @@ class WidgetService {
   }
 }
 
-/// 백그라운드 콜백 함수 (사용하지 않지만 호환성을 위해 유지)
 @pragma("vm:entry-point")
 Future<void> backgroundCallback(Uri? data) async {
-  // 더 이상 사용하지 않음
-  
+  // 추가 기능이 필요하다면 여기서
 }

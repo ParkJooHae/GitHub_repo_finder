@@ -64,7 +64,6 @@ class _BookmarkPageState extends State<BookmarkPage> {
     );
   }
 
-  /// 북마크 컨텐츠 빌드
   Widget _buildBookmarkContent(BookmarkProvider provider) {
     // 로딩 상태
     if (provider.isLoading) {
@@ -94,7 +93,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
     return _buildBookmarkList(provider);
   }
 
-  /// 에러 상태 UI
+  /// 에러 UI
   Widget _buildErrorState(BookmarkProvider provider) {
     return Center(
       child: Padding(
@@ -136,7 +135,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
     );
   }
 
-  /// 빈 상태 UI
+  /// 비어있는 UI
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -176,7 +175,6 @@ class _BookmarkPageState extends State<BookmarkPage> {
       onRefresh: provider.refreshBookmarks,
       child: Column(
         children: [
-          // 북마크 개수 헤더
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -209,7 +207,6 @@ class _BookmarkPageState extends State<BookmarkPage> {
             ),
           ),
 
-          // 북마크 리스트
           Expanded(
             child: ListView.builder(
               itemCount: provider.bookmarks.length,
@@ -230,12 +227,12 @@ class _BookmarkPageState extends State<BookmarkPage> {
     );
   }
 
-  /// 북마크 제거 처리
+  /// 북마크 제거
   Future<void> _removeBookmark(
       RepositoryEntity repository,
       BookmarkProvider provider
       ) async {
-    // 확인 다이얼로그 표시
+
     final shouldRemove = await _showRemoveBookmarkDialog(repository.name);
     if (!shouldRemove) return;
 
@@ -250,7 +247,6 @@ class _BookmarkPageState extends State<BookmarkPage> {
             action: SnackBarAction(
               label: '실행취소',
               onPressed: () async {
-                // 다시 북마크 추가
                 try {
                   await provider.addBookmark(repository);
                 } catch (e) {
@@ -281,7 +277,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
     }
   }
 
-  /// 북마크 제거 확인 다이얼로그
+  /// 북마크 하나 제거 dialog
   Future<bool> _showRemoveBookmarkDialog(String repositoryName) async {
     final result = await showDialog<bool>(
       context: context,
@@ -305,7 +301,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
     return result ?? false;
   }
 
-  /// 모든 북마크 삭제 확인 다이얼로그
+  /// 모든 북마크 삭제 dialog
   void _showClearAllDialog() {
     showDialog(
       context: context,
@@ -320,7 +316,6 @@ class _BookmarkPageState extends State<BookmarkPage> {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-
               try {
                 await context.read<BookmarkProvider>().clearAllBookmarks();
 

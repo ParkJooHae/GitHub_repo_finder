@@ -7,7 +7,6 @@ class Debouncer {
 
   Debouncer({required this.delay});
 
-  /// 함수 실행을 디바운싱
   /// [callback]이 연속으로 호출되면 이전 타이머를 취소하고 새로 시작
   void call(VoidCallback callback) {
     _timer?.cancel();

@@ -2,9 +2,6 @@ import '../../domain/entities/repository_entity.dart';
 import '../../domain/repositories/bookmark_repository.dart';
 import '../datasources/bookmark_local_datasource.dart';
 
-/// 북마크 Repository 구현체
-///
-/// BookmarkLocalDataSource를 사용하여 로컬 데이터베이스(Hive)와 통신
 class BookmarkRepositoryImpl implements BookmarkRepository {
   final BookmarkLocalDataSource _localDataSource;
 
@@ -15,7 +12,6 @@ class BookmarkRepositoryImpl implements BookmarkRepository {
     try {
       return await _localDataSource.getBookmarks();
     } catch (e) {
-      // 예외를 그대로 전파 (UseCase에서 처리)
       rethrow;
     }
   }
@@ -68,7 +64,6 @@ class BookmarkRepositoryImpl implements BookmarkRepository {
   @override
   Future<int> getBookmarkCount() async {
     try {
-      // DataSource의 getBookmarkCount 메서드 사용 (효율적)
       return await _localDataSource.getBookmarkCount();
     } catch (e) {
       rethrow;

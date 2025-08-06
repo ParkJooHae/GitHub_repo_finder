@@ -19,6 +19,7 @@ GitHub REST API를 활용하여 저장소를 검색하고, 마음에 드는 저�
 ### Provider
 - Android Native개발에서 적용하던 ViewModel을 Flutter에선 어떻게 사용하는지 찾아보고 그대로 적용했습니다.
 - 공식 문서로 권장하는 패턴이었고, MVVM과 마찬가지로 Clean Architecture와 자연스럽게 연결되는 구조였습니다.
+- 간단한 의존성 주입을 제공한다고 해서 다른 DI라이브러리를 적용하지는 않았습니다.
 - 기존 경험이 있었기 때문에 더 이해하기가 쉬웠습니다.
 ### Repository
 - 데이터 접근 로직을 추상화 하여 의존성을 분리했습니다.
@@ -37,9 +38,8 @@ GitHub REST API를 활용하여 저장소를 검색하고, 마음에 드는 저�
 - Android Native개발에서 Json 데이터 관리는 serialization이나 Gson을 이용했었지만, Flutter에서는 build_runner를 이용해 직렬화 코드를 자동 생성 가능하다고 하여 적용해 봤습니다.
 - 명령어를 이용해 코드를 생성해봤고, 단순 노가다성 코딩을 줄일 수 있어서 좋았습니다.
 ### AppWidgetProvider
-- Android Native에서 위젯 개발 경험이 있기 때문에, 간단하게 네이티브 위젯을 개발했습니다. 
-- xml기반으로 제작해서, card view형태로 보이도록 했습니다. 
-- SharedPreferences를 사용하여 데이터를 주고받을 수 있습니다.
+- Android Native에서 위젯 개발 경험이 있기 때문에, 간단한 네이티브 위젯을 개발했습니다. 
+- xml기반으로 제작해서, card view형태로 보이도록 했습니다.
 
 ## 프로젝트 구조
 
@@ -106,7 +106,6 @@ lib/
 
 ### Data Management
 - **Hive** - 로컬 NoSQL 데이터베이스
-- **http** - REST API 통신
 - **JSON Annotation** - 자동 직렬화
 
 ### UI & Navigation
@@ -135,6 +134,7 @@ lib/
 
 - **Android 홈화면 위젯**
   - 최신 북마크 표시
+  - RepoWidgetProvider - Kolin기반 native구현
 
 ### 비즈니스 로직 (UseCase)
 
@@ -154,9 +154,11 @@ lib/
 
 - Claude (Anthropic) - Clean Architecture 설계, Flutter 학습, 리팩토링 가이드
 
-개발 초기 단계에서 요구사항 분석 및 전체적인 아키텍처 설계에 도움을 받았으며, Clean Architecture 패턴 적용과 문서 작성 과정에서 가이드를 제공받았습니다.
+개발 초기 단계에서 개발 환경 설정, 요구사항 분석 및 전체적인 아키텍처 설계에 도움을 받았으며, Clean Architecture 패턴 적용과 문서 작성 과정에서 가이드를 제공받았습니다.
 
-익숙하지 않은 flutter개발을 위해 Native개발에서 익혔던 기능들을 flutter에선 어떤 명칭으로 어떻게 사용중인지 질문하고 대체 가능한 부분을 학습 후 적용했습니다.
+익숙하지 않은 flutter개발을 위해 Native개발에서 익혔던 기능들을 flutter에선 어떤 명칭으로 혹은 다른 라이브러리로 사용중인지 질문하고, 대체 가능한 부분을 학습 후 적용했습니다.
+
+
 
 ## 학습 리소스
 
@@ -168,12 +170,9 @@ lib/
 - [Flutter Architecture Samples](https://github.com/brianegan/flutter_architecture_samples)
 - [Provider State Management](https://docs.flutter.dev/development/data-and-backend/state-mgmt/simple)
 
-### Testing
-- [Flutter Testing Guide](https://docs.flutter.dev/testing)
-- [Mockito for Flutter](https://pub.dev/packages/mockito)
-
 ---
 
 **개발자**: ParkJooHae  
 **개발 기간**: 2025년 8월 4일 ~ 2025년 8월 5일  
-**총 소요 시간**: 8시간
+**개발 시간**: 8시간
+**문서 작성 시간**: 2시간

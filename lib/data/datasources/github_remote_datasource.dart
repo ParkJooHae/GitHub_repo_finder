@@ -24,12 +24,11 @@ class GitHubRemoteDataSourceImpl implements GitHubRemoteDataSource {
     int page = 1,
     int perPage = ApiConstants.defaultPerPage,
   }) async {
-    // 빈 쿼리 검증
+
     if (query.trim().isEmpty) {
       throw const GitHubApiException('검색어를 입력해주세요.');
     }
 
-    // URL 파라미터 구성
     final uri = Uri.parse('${ApiConstants.baseUrl}${ApiConstants.searchRepositories}')
         .replace(queryParameters: {
       'q': query.trim(),
@@ -40,7 +39,6 @@ class GitHubRemoteDataSourceImpl implements GitHubRemoteDataSource {
     });
 
     try {
-      // HTTP 요청 실행
       final response = await client
           .get(
         uri,
@@ -85,7 +83,6 @@ class GitHubRemoteDataSourceImpl implements GitHubRemoteDataSource {
       errorMessage = _getDefaultErrorMessage(statusCode);
     }
 
-    // Rate Limiting (403)
     if (statusCode == 403) {
       final resetHeader = response.headers['x-ratelimit-reset'];
       DateTime? resetTime;

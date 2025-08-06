@@ -7,7 +7,6 @@ import '../pages/bookmark_page.dart';
 /// 앱의 라우팅 설정
 class AppRouter {
   static final GoRouter router = GoRouter(
-    // 앱 시작시 기본 경로
     initialLocation: '/search',
 
     debugLogDiagnostics: true,
@@ -18,14 +17,12 @@ class AppRouter {
           return MainPage(child: child);
         },
         routes: [
-          // 검색 페이지
           GoRoute(
             path: '/search',
             name: 'search',
             builder: (context, state) => const SearchPage(),
           ),
 
-          // 북마크 페이지
           GoRoute(
             path: '/bookmarks',
             name: 'bookmarks',
