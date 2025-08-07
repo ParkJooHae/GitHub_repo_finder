@@ -54,6 +54,9 @@ class GitHubRemoteDataSourceImpl implements GitHubRemoteDataSource {
     } on FormatException catch (e) {
       throw GitHubApiException('응답 데이터 형식이 올바르지 않습니다: ${e.message}');
     } catch (e) {
+      if (e is AppException) {
+        rethrow;
+      }
       throw GitHubApiException('알 수 없는 오류가 발생했습니다: $e');
     }
   }
@@ -72,7 +75,6 @@ class GitHubRemoteDataSourceImpl implements GitHubRemoteDataSource {
       }
     }
 
-    // 에러 응답 처리
     String errorMessage;
     Map<String, dynamic>? errorData;
 
@@ -83,7 +85,7 @@ class GitHubRemoteDataSourceImpl implements GitHubRemoteDataSource {
       errorMessage = _getDefaultErrorMessage(statusCode);
     }
 
-    if (statusCode == 403) {
+    if (statusCode == 403) { // 사용 한도 초과
       final resetHeader = response.headers['x-ratelimit-reset'];
       DateTime? resetTime;
       if (resetHeader != null) {
@@ -92,10 +94,10 @@ class GitHubRemoteDataSourceImpl implements GitHubRemoteDataSource {
           resetTime = DateTime.fromMillisecondsSinceEpoch(resetTimestamp * 1000);
         }
       }
-      throw RateLimitException(errorMessage, statusCode, errorData, resetTime);
+      final rateLimitMessage = _getDefaultErrorMessage(statusCode);
+      throw RateLimitException(rateLimitMessage, statusCode, errorData, resetTime, null);
     }
 
-    // 기타 GitHub API 에러
     throw GitHubApiException(errorMessage, statusCode, errorData);
   }
 

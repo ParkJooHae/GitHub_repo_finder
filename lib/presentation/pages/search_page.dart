@@ -51,7 +51,7 @@ class _SearchPageState extends State<SearchPage> {
       provider.loadMoreRepositories();
     }
 
-    // 상단으로 올라가는 버튼 표시 여부 결정
+    // 이동 버튼 표시 여부 결정
     final shouldShowButton = _scrollController.position.pixels > 300;
     if (_showScrollToTopButton != shouldShowButton) {
       setState(() {
@@ -325,8 +325,7 @@ class _SearchPageState extends State<SearchPage> {
       ),
     );
   }
-
-  /// 더 로딩 인디케이터
+  /// 로딩
   Widget _buildLoadMoreIndicator(SearchProvider provider) {
     if (provider.isLoadingMore) {
       return const Padding(
@@ -345,7 +344,7 @@ class _SearchPageState extends State<SearchPage> {
     FocusScope.of(context).unfocus();
   }
 
-  /// 상단으로 올라가는 버튼
+  /// 버튼
   Widget? _buildScrollToTopButton() {
     return Consumer<SearchProvider>(
       builder: (context, provider, child) {

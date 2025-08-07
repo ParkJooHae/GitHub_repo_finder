@@ -14,24 +14,28 @@ enum SearchStatus {
 }
 
 class SearchProvider extends ChangeNotifier {
+
+  // UseCase
   final SearchRepositoriesUseCase _searchRepositoriesUseCase;
-  final Debouncer _debouncer;
+
+  final Debouncer _debouncer;  // 검색 입력 디바운싱용
 
   // 상태 관리
-  SearchStatus _status = SearchStatus.initial;
-  List<RepositoryEntity> _repositories = [];
-  String _errorMessage = '';
-  String _currentQuery = '';
+  SearchStatus _status = SearchStatus.initial; // 현재 검색 상태
+  List<RepositoryEntity> _repositories = []; // 검색된 저장소 목록
+  String _errorMessage = ''; // 에러 메시지
+  String _currentQuery = ''; // 현재 검색 쿼리
 
-  // 페이지네이션
-  int _currentPage = 1;
-  int _totalCount = 0;
-  bool _hasMorePages = false;
-  static const int _perPage = 30;
+  // 페이지네이션 관련
+  int _currentPage = 1; // 현재 페이지 번호
+  int _totalCount = 0; // 전체 검색 결과 수
+  bool _hasMorePages = false; // 더 많은 페이지 존재 여부
+  static const int _perPage = 30; // 페이지당 항목 수
 
   SearchProvider(this._searchRepositoriesUseCase)
       : _debouncer = Debouncer(delay: const Duration(milliseconds: 300));
 
+  // Getter 메서드들
   SearchStatus get status => _status;
   List<RepositoryEntity> get repositories => _repositories;
   String get errorMessage => _errorMessage;
@@ -46,15 +50,15 @@ class SearchProvider extends ChangeNotifier {
   /// 검색 실행
   void searchRepositories(String query) {
     final trimmedQuery = query.trim();
-
     _currentQuery = trimmedQuery;
-    
-    // 디바운스 적용
+
     _debouncer.call(() {
-      if (_currentQuery.isEmpty) {
+      final capturedQuery = _currentQuery;
+      
+      if (capturedQuery.isEmpty) {
         _clearResults();
       } else {
-        _performSearch(_currentQuery, isNewSearch: true);
+        _performSearch(capturedQuery, isNewSearch: true);
       }
     });
   }
@@ -121,10 +125,15 @@ class SearchProvider extends ChangeNotifier {
     if (error is RateLimitException) {
       final resetTime = error.resetTime;
       if (resetTime != null) {
-        final waitMinutes = resetTime.difference(DateTime.now()).inMinutes;
-        message = 'API 사용량 한도 초과. ${waitMinutes}분 후 다시 시도해주세요.';
+        final waitSeconds = resetTime.difference(DateTime.now()).inSeconds;
+        if (waitSeconds > 60) {
+          final waitMinutes = (waitSeconds / 60).ceil();
+          message = '${error.message} ${waitMinutes}분 후 다시 시도해주세요.';
+        } else {
+          message = '${error.message} ${waitSeconds}초 후 다시 시도해주세요.';
+        }
       } else {
-        message = 'API 사용량 한도를 초과했습니다. 잠시 후 다시 시도해주세요.';
+        message = '${error.message} 잠시 후 다시 시도해주세요.';
       }
     } else if (error is NetworkException) {
       message = error.message;
@@ -137,7 +146,6 @@ class SearchProvider extends ChangeNotifier {
     _errorMessage = message;
     _status = SearchStatus.error;
 
-    // 새 검색이 아닌 경우 페이지 롤백
     if (!isNewSearch && _currentPage > 1) {
       _currentPage--;
     }
@@ -151,7 +159,7 @@ class SearchProvider extends ChangeNotifier {
     _hasMorePages = false;
     _status = SearchStatus.initial;
     _errorMessage = '';
-    _currentQuery = ''; // 현재 쿼리도 초기화
+    _currentQuery = '';
     notifyListeners();
   }
 

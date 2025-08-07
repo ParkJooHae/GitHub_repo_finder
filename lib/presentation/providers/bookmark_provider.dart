@@ -24,17 +24,19 @@ enum BookmarkStatus {
 
 class BookmarkProvider extends ChangeNotifier {
 
+  // UseCase
   final GetBookmarksUseCase _getBookmarksUseCase;
   final AddBookmarkUseCase _addBookmarkUseCase;
   final RemoveBookmarkUseCase _removeBookmarkUseCase;
   final ToggleBookmarkUseCase _toggleBookmarkUseCase;
   final ClearAllBookmarksUseCase _clearAllBookmarksUseCase;
 
-  BookmarkStatus _status = BookmarkStatus.initial;
-  List<RepositoryEntity> _bookmarks = [];
-  String _errorMessage = '';
-  Set<int> _bookmarkedIds = {};
-  BookmarkSortOrder _sortOrder = BookmarkSortOrder.newest;
+  // 상태 관리 변수
+  BookmarkStatus _status = BookmarkStatus.initial;  // 현재 북마크 상태
+  List<RepositoryEntity> _bookmarks = []; // 북마크된 저장소 목록
+  String _errorMessage = '';  // 에러 메시지
+  Set<int> _bookmarkedIds = {};  // 북마크된 저장소 ID 캐시 (빠른 조회용)
+  BookmarkSortOrder _sortOrder = BookmarkSortOrder.newest;  // 정렬 순서
 
   BookmarkProvider({
     required GetBookmarksUseCase getBookmarksUseCase,
@@ -50,6 +52,7 @@ class BookmarkProvider extends ChangeNotifier {
     _loadBookmarks();
   }
 
+  // Getter 메서드들
   BookmarkStatus get status => _status;
   List<RepositoryEntity> get bookmarks => _bookmarks;
   String get errorMessage => _errorMessage;
@@ -73,12 +76,6 @@ class BookmarkProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 북마크 정렬 (로드 시에만 사용)
-  void _sortBookmarks() {
-    // 로드 시에는 항상 최신순으로 정렬되어 있으므로 아무것도 하지 않음
-    // 토글은 toggleSortOrder()에서 처리
-  }
-
   /// 저장소가 북마크되어 있는지 확인
   bool isBookmarked(int repositoryId) {
     return _bookmarkedIds.contains(repositoryId);
@@ -98,16 +95,12 @@ class BookmarkProvider extends ChangeNotifier {
 
       _bookmarks = await _getBookmarksUseCase.call();
       _updateBookmarkedIds();
-      _sortBookmarks(); // 북마크 로드 시 정렬
 
       await WidgetService.updateWidget(_bookmarks);
 
       _status = BookmarkStatus.success;
       _errorMessage = '';
 
-      if (kDebugMode) {
-    
-      }
     } catch (e) {
       _handleError(e);
     }
@@ -123,15 +116,11 @@ class BookmarkProvider extends ChangeNotifier {
       final bookmarkedRepo = repository.copyWithBookmark();
       _bookmarks.insert(0, bookmarkedRepo);
       _bookmarkedIds.add(repository.id);
-      _sortBookmarks(); // 북마크 추가 시 정렬
 
       await WidgetService.updateWidget(_bookmarks);
 
       notifyListeners();
 
-      if (kDebugMode) {
-
-      }
     } catch (e) {
       _handleError(e);
       rethrow;
@@ -146,15 +135,11 @@ class BookmarkProvider extends ChangeNotifier {
       final removedRepo = _bookmarks.firstWhere((repo) => repo.id == repositoryId);
       _bookmarks.removeWhere((repo) => repo.id == repositoryId);
       _bookmarkedIds.remove(repositoryId);
-      _sortBookmarks(); // 북마크 제거 시 정렬
 
       await WidgetService.updateWidget(_bookmarks);
 
       notifyListeners();
 
-      if (kDebugMode) {
-
-      }
     } catch (e) {
       _handleError(e);
       rethrow;
@@ -168,9 +153,6 @@ class BookmarkProvider extends ChangeNotifier {
 
       await _loadBookmarks();
 
-      if (kDebugMode) {
-
-      }
     } catch (e) {
       _handleError(e);
       rethrow;
@@ -195,9 +177,6 @@ class BookmarkProvider extends ChangeNotifier {
 
         notifyListeners();
 
-        if (kDebugMode) {
-  
-        }
       }
     } catch (e) {
       _handleError(e);
@@ -217,10 +196,6 @@ class BookmarkProvider extends ChangeNotifier {
   /// 위젯 강제 업데이트 (디버깅용)
   Future<void> forceUpdateWidget() async {
     await WidgetService.updateWidget(_bookmarks);
-
-    if (kDebugMode) {
-      
-    }
   }
 
   /// 북마크된 ID 캐시 업데이트
@@ -246,10 +221,6 @@ class BookmarkProvider extends ChangeNotifier {
 
     _errorMessage = message;
     _status = BookmarkStatus.error;
-
-    if (kDebugMode) {
-
-    }
   }
 
   /// 에러 상태 초기화
