@@ -251,7 +251,7 @@ class _SearchPageState extends State<SearchPage> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: Text(
                 '총 ${provider.totalCount.toString().replaceAllMapped(
                     RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
@@ -360,8 +360,8 @@ class _SearchPageState extends State<SearchPage> {
             },
             backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            child: const Icon(Icons.keyboard_arrow_up),
             mini: true,
+            child: const Icon(Icons.keyboard_arrow_up),
           );
         }
         return const SizedBox.shrink();

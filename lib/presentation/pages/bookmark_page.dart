@@ -205,7 +205,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: Row(
               children: [
                 Icon(
@@ -382,11 +382,12 @@ class _BookmarkPageState extends State<BookmarkPage> {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
               try {
                 await context.read<BookmarkProvider>().clearAllBookmarks();
 
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(
                       content: Text('모든 북마크가 삭제되었습니다.'),
                       duration: Duration(seconds: 2),
@@ -395,7 +396,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  scaffoldMessenger.showSnackBar(
                     SnackBar(
                       content: Text('북마크 삭제 중 오류가 발생했습니다: $e'),
                       backgroundColor: Colors.red,
@@ -428,8 +429,8 @@ class _BookmarkPageState extends State<BookmarkPage> {
             },
             backgroundColor: Theme.of(context).colorScheme.primary,
             foregroundColor: Theme.of(context).colorScheme.onPrimary,
-            child: const Icon(Icons.keyboard_arrow_up),
             mini: true,
+            child: const Icon(Icons.keyboard_arrow_up),
           );
         }
         return const SizedBox.shrink();

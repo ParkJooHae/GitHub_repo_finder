@@ -1,7 +1,6 @@
 import '../entities/repository_entity.dart';
 import '../repositories/bookmark_repository.dart';
 
-/// - 북마크 목록을 최신순으로 정렬하여 반환
 class GetBookmarksUseCase {
   final BookmarkRepository _repository;
 

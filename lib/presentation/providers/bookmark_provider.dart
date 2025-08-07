@@ -68,7 +68,7 @@ class BookmarkProvider extends ChangeNotifier {
         ? BookmarkSortOrder.oldest 
         : BookmarkSortOrder.newest;
     
-    // 현재 정렬 상태에 따라 리스트를 뒤집기
+    // 리스트를 뒤집어서 정렬 순서 변경
     if (_bookmarks.isNotEmpty) {
       _bookmarks = _bookmarks.reversed.toList();
     }
@@ -95,6 +95,9 @@ class BookmarkProvider extends ChangeNotifier {
 
       _bookmarks = await _getBookmarksUseCase.call();
       _updateBookmarkedIds();
+
+      // 현재 정렬 순서에 따라 리스트 정렬
+      _applySortOrder();
 
       await WidgetService.updateWidget(_bookmarks);
 
@@ -132,7 +135,6 @@ class BookmarkProvider extends ChangeNotifier {
     try {
       await _removeBookmarkUseCase.call(repositoryId);
 
-      final removedRepo = _bookmarks.firstWhere((repo) => repo.id == repositoryId);
       _bookmarks.removeWhere((repo) => repo.id == repositoryId);
       _bookmarkedIds.remove(repositoryId);
 
@@ -149,7 +151,7 @@ class BookmarkProvider extends ChangeNotifier {
   /// 북마크 토글 (UseCase 사용)
   Future<void> toggleBookmark(RepositoryEntity repository) async {
     try {
-      final isNowBookmarked = await _toggleBookmarkUseCase.call(repository);
+      await _toggleBookmarkUseCase.call(repository);
 
       await _loadBookmarks();
 
@@ -201,6 +203,17 @@ class BookmarkProvider extends ChangeNotifier {
   /// 북마크된 ID 캐시 업데이트
   void _updateBookmarkedIds() {
     _bookmarkedIds = _bookmarks.map((repo) => repo.id).toSet();
+  }
+
+  /// 새로고침 시 현재 정렬 순서에 따라 북마크 리스트 정렬
+  void _applySortOrder() {
+    if (_bookmarks.isEmpty) return;
+    
+    // UseCase에서 가져온 데이터는 최신순으로 정렬되어 있음
+    // 현재 정렬 순서가 오래된순이면 리스트를 뒤집기
+    if (_sortOrder == BookmarkSortOrder.oldest) {
+      _bookmarks = _bookmarks.reversed.toList();
+    }
   }
 
   /// 에러 처리

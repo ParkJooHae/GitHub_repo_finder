@@ -128,9 +128,9 @@ class SearchProvider extends ChangeNotifier {
         final waitSeconds = resetTime.difference(DateTime.now()).inSeconds;
         if (waitSeconds > 60) {
           final waitMinutes = (waitSeconds / 60).ceil();
-          message = '${error.message} ${waitMinutes}분 후 다시 시도해주세요.';
+          message = '${error.message} $waitMinutes분 후 다시 시도해주세요.';
         } else {
-          message = '${error.message} ${waitSeconds}초 후 다시 시도해주세요.';
+          message = '${error.message} $waitSeconds초 후 다시 시도해주세요.';
         }
       } else {
         message = '${error.message} 잠시 후 다시 시도해주세요.';

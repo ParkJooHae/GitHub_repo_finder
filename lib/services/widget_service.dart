@@ -29,7 +29,7 @@ class WidgetService {
 
       
     } catch (e) {
-      
+      // 위젯 업데이트 실패 시 무시
     }
   }
 
@@ -51,7 +51,7 @@ class WidgetService {
       await HomeWidget.setAppGroupId('group.com.jhp.github_repo_finder');
       
     } catch (e) {
-      
+      // 위젯 초기화 실패 시
     }
   }
 
