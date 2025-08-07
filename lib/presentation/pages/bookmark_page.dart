@@ -29,7 +29,7 @@ class _BookmarkPageState extends State<BookmarkPage> {
 
   /// 스크롤 이벤트
   void _onScroll() {
-    // 상단으로 올라가는 버튼 표시 여부 결정
+    // 상단 이동 버튼 표시 여부 결정
     final shouldShowButton = _scrollController.position.pixels > 300;
     if (_showScrollToTopButton != shouldShowButton) {
       setState(() {
@@ -226,19 +226,6 @@ class _BookmarkPageState extends State<BookmarkPage> {
                 GestureDetector(
                   onTap: () {
                     provider.toggleSortOrder();
-                    
-                    // 정렬 변경 피드백
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          provider.sortOrder == BookmarkSortOrder.newest 
-                              ? '최신순으로 정렬되었습니다.' 
-                              : '오래된순으로 정렬되었습니다.'
-                        ),
-                        duration: const Duration(seconds: 1),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

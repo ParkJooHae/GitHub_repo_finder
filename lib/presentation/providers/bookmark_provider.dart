@@ -67,8 +67,7 @@ class BookmarkProvider extends ChangeNotifier {
     _sortOrder = _sortOrder == BookmarkSortOrder.newest 
         ? BookmarkSortOrder.oldest 
         : BookmarkSortOrder.newest;
-    
-    // 리스트를 뒤집어서 정렬 순서 변경
+
     if (_bookmarks.isNotEmpty) {
       _bookmarks = _bookmarks.reversed.toList();
     }
@@ -208,9 +207,7 @@ class BookmarkProvider extends ChangeNotifier {
   /// 새로고침 시 현재 정렬 순서에 따라 북마크 리스트 정렬
   void _applySortOrder() {
     if (_bookmarks.isEmpty) return;
-    
-    // UseCase에서 가져온 데이터는 최신순으로 정렬되어 있음
-    // 현재 정렬 순서가 오래된순이면 리스트를 뒤집기
+
     if (_sortOrder == BookmarkSortOrder.oldest) {
       _bookmarks = _bookmarks.reversed.toList();
     }
